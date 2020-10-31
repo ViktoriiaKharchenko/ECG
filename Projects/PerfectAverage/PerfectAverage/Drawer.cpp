@@ -79,8 +79,13 @@ bool Drawer::switchEvent(Event event, RenderWindow& window)
 	{
 		return false;
 	}
-
-
+	if (event.type == Event::KeyPressed)
+	{
+		if (event.key.code == Keyboard::Enter)
+		{
+			return false;
+		}
+	}
 
 	return true;
 }
@@ -106,6 +111,17 @@ void Drawer::add(ECG ecg)
 	for (int i = 1; i < ecg.data.size(); i++)
 	{
 		toDrawLines.push_back(GLine(GPoint(i - 1.0, -ecg.data[i - 1]), GPoint(i, -ecg.data[i])));
+	}
+}
+
+void Drawer::addGraph(vector <double> data, int l)
+{
+	for (int i = 1; i < data.size(); i++)
+	{
+		GLine line = GLine(GPoint(l + i - 1.0, -data[i - 1]), GPoint(l + i, -data[i]));
+		line.c = Color(0, 255, 0);
+
+		toDrawLines.push_back(line);
 	}
 }
 

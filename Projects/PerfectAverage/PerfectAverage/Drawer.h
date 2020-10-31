@@ -30,6 +30,7 @@ public:
 	Drawer();
 
 	void add(ECG ecg);
+	void addGraph(vector <double> data, int l);
 	void clear();
 
 	void show(int windowX = 1800, int windowY = 500);
