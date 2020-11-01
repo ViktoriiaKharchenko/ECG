@@ -32,7 +32,7 @@ int main()
 	{
 		//if (it.second == 'N')
 		{
-			cout << it.second << "\n";
+			cout << it.first << " " << it.second << "\n";
 			ECG ecg;
 
 			ecg.readFromFile("../../../Data/TXT/" + it.first + ".txt");
@@ -41,14 +41,18 @@ int main()
 			{
 				continue;
 			}
-			vector <double> peaks = ecg.getRs1(900, 3900);
-			ecg.data = vector<double>(ecg.data.begin() + 600, ecg.data.begin() + 4200);
-
+			vector <double> transform = ecg.transformPeaks1(900, 3000);
+			vector <int> peaks = ecg.getRPeaks(900, 3000);
+			ecg.data = vector<double>(ecg.data.begin() + 600, ecg.data.begin() + 3300);
 
 			Drawer d;
 
 			d.add(ecg);
-			d.addGraph(peaks, 310);
+			//d.addGraph(transform, 300, Color::Green);
+			for (auto it : peaks)
+			{
+				d.addVerticalLine(300 + it);
+			}
 
 			d.show();
 		}

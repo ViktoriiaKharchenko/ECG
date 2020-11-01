@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
 #include "GLine.h"
 #include "ECG.h"
@@ -20,18 +21,20 @@ class Drawer
 	void process(RenderWindow& window);
 
 	vector <GLine> toDrawLines;
+	vector <pair<double, Color> > verticalLines;
 
 	void rescaleCoordinates(double windowX, double windowY);
 
 public:
 
-	const static int windowShift = 100.0;
+	const static int windowShift = 50.0;
 
 	Drawer();
 
 	void add(ECG ecg);
-	void addGraph(vector <double> data, int l);
+	void addGraph(vector <double> data, int l, Color c = Color::Black);
+	void addVerticalLine(double pos, Color c = Color::Red);
 	void clear();
 
-	void show(int windowX = 1800, int windowY = 500);
+	void show(int windowX = 1800, int windowY = 300);
 };

@@ -10,6 +10,9 @@ using namespace sf;
 
 class ECG
 {
+	const static int MaxPeakDuration;
+	const static int HalfPeakDuration;
+
 public:
 	
 	static map<string, char> reference;
@@ -24,5 +27,6 @@ public:
 	ECG();
 	bool readFromFile(string path);
 
-	vector <double> getRs1(int l, int r);
+	vector <double> transformPeaks1(int l, int r);
+	vector <int> getRPeaks(int l, int r);
 };
