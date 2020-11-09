@@ -83,12 +83,13 @@ int main()
 			ECG ecg;
 
 			ecg.readFromFile("../../../Data/TXT/" + it.first + ".txt");
-
+			cout << ecg.data.size()<<endl;
 			if (ecg.data.size() < 8999)
 			{
 				continue;
 			}
 			vector <double> transform = ecg.transformPeaks1(900, 8000);
+			
 			vector <int> peaks = ecg.getRPeaks(900, 8000);
 			ecg.data = vector<double>(ecg.data.begin() + 600, ecg.data.begin() + 8300);
 

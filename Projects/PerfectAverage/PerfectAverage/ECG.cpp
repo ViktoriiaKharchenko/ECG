@@ -68,7 +68,10 @@ vector <double> ECG::transformPeaks1(int l, int r)
 
 	suffMin.resize(n);
 	suffMax.resize(n);
-	for (int i = n - 1; i >= 0; i--)
+	suffMin[n - 1] = subData[n - 1];
+	suffMax[n - 1] = subData[n - 1];
+
+	for (int i = n - 2; i >= 0; i--)
 	{
 		if (i % HalfPeakDuration == HalfPeakDuration - 1)
 		{
