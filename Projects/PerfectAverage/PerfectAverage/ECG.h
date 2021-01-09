@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <set>
 #include <map>
 #include <fstream>
 #include <SFML/Graphics.hpp>
@@ -26,6 +27,9 @@ public:
 
 	ECG();
 	bool readFromFile(string path);
+
+	vector <double> averageFilter(vector <double> _data, int D);
+	vector <double> medianFilter(vector <double> _data, int D);
 
 	vector <double> transformPeaks1(int l, int r);
 	vector <int> getRPeaks(int l, int r);
