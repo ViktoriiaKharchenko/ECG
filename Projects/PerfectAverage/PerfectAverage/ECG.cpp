@@ -45,6 +45,89 @@ bool ECG::readFromFile(string path)
 const int ECG::MaxPeakDuration = 16;
 const int ECG::HalfPeakDuration = ECG::MaxPeakDuration / 2;
 
+vector <double> ECG::averageFilter(vector <double> _data, int D)
+{
+	vector <double> pref;
+	vector <double> res;
+
+	int R = D / 2;
+
+	pref.push_back(0.0);
+	for (auto it : _data)
+	{
+		pref.push_back(pref.back() + it);
+	}
+
+	for (int i = 0; i < _data.size(); i++)
+	{
+		int l = max(i - R, 0), r = min(i + R, int(_data.size()) - 1);
+
+		res.push_back((pref[r + 1] - pref[l]) / double(r - l + 1));
+	}
+
+	return res;
+}
+
+vector <double> ECG::medianFilter(vector <double> _data, int D)
+{
+	multiset<double> ls, rs;
+	int l = 0, r = 0;
+	int R = D / 2;
+
+	vector <double> res;
+
+	for (int i = 0; i < _data.size(); i++)
+	{
+		int tl = max(i - R, 0), tr = min(i + R, int(_data.size()) - 1);
+
+		while (l < tl)
+		{
+			if (ls.find(_data[l]) != ls.end())
+			{
+				ls.erase(ls.find(_data[l]));
+			}
+			else
+			{
+				rs.erase(rs.find(_data[l]));
+			}
+
+			l++;
+		}
+
+		while (r <= tr)
+		{
+			if (rs.size() != 0 && _data[r] < (*rs.begin()))
+			{
+				ls.insert(_data[r]);
+			}
+			else
+			{
+				rs.insert(_data[r]);
+			}
+
+			r++;
+		}
+
+		while (ls.size() != rs.size() && ls.size() + 1 != rs.size())
+		{
+			if (ls.size() < rs.size())
+			{
+				ls.insert(*rs.begin());
+				rs.erase(rs.begin());
+			}
+			else
+			{
+				rs.insert(*ls.rbegin());
+				ls.erase(--ls.end());
+			}
+		}
+
+		res.push_back(*rs.begin());
+	}
+
+	return res;
+}
+
 vector <double> ECG::transformPeaks1(int l, int r)
 {
 	int n = r - l;

@@ -140,12 +140,14 @@
     <ClCompile Include="GLine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GPoint.cpp" />
+    <ClCompile Include="Solver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Drawer.h" />
     <ClInclude Include="ECG.h" />
     <ClInclude Include="GLine.h" />
     <ClInclude Include="GPoint.h" />
+    <ClInclude Include="Solver.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

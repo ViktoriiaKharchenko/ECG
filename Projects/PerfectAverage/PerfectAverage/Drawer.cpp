@@ -129,7 +129,7 @@ void Drawer::add(ECG ecg)
 {
 	for (int i = 1; i < ecg.data.size(); i++)
 	{
-		toDrawLines.push_back(GLine(GPoint(i - 1.0, -ecg.data[i - 1]), GPoint(i, -ecg.data[i])));
+		toDrawLines.push_back(GLine(GPoint(i - 1.0, -ecg.data[i - 1]), GPoint(i, -ecg.data[i]), ecg.drawingColor));
 	}
 }
 
