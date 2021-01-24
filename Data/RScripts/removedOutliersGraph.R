@@ -13,7 +13,7 @@ outRemove <- function(x){
     print(peaks[,1][ind])
     newPeaks<-peaks[,1][-ind]
   ###########################################3  
-    #write outlier peak replacement with mean value 
+    #write outliers peak replacement with mean value 
    ######################################### 
     #peaks[,1] <- peaks[,1][-ind]
   }
