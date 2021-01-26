@@ -7,7 +7,9 @@ int main()
 
 	Solver s;
 
-	s.solve2();
+	//s.solve2();
+
+	s.testButterworthFilterECG();
 
 	return 0;
 }

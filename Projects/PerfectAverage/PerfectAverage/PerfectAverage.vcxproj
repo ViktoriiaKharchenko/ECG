@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ButterworthFilter.cpp" />
     <ClCompile Include="Drawer.cpp" />
     <ClCompile Include="ECG.cpp" />
     <ClCompile Include="GLine.cpp" />
@@ -143,6 +144,7 @@
     <ClCompile Include="Solver.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ButterworthFilter.h" />
     <ClInclude Include="Drawer.h" />
     <ClInclude Include="ECG.h" />
     <ClInclude Include="GLine.h" />

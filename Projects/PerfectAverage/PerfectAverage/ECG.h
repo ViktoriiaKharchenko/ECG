@@ -6,6 +6,9 @@
 #include <map>
 #include <fstream>
 #include <SFML/Graphics.hpp>
+
+#include "ButterworthFilter.h"
+
 using namespace std;
 using namespace sf;
 

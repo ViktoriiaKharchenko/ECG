@@ -147,6 +147,95 @@ void Solver::solve2()
 			d.show();
 		}
 	}
+}
+
+void Solver::testButterworthFilterSin()
+{
+	ButterworthFilter btwFilter;
+
+	double rate = 1.0 / 300.0;
+
+	btwFilter.setParameters(rate, 35, 10);
+
+	vector <double> arr;
+
+	for (int i = 0; i < 2000; i++)
+	{
+		arr.push_back(100 * sin(1.0 * i * rate) + 50 * sin(50.0 * i * rate));
+	}
+
+	vector <double> filtered = btwFilter.filter(arr);
+
+	for (auto& it : filtered)
+	{
+		it += 500;
+	}
+
+	Drawer d;
+
+	ECG e1, e2;
+
+	e1.data = arr; e1.drawingColor = Color::Blue;
+	e2.data = filtered; e2.drawingColor = Color::Green;
+
+	d.add(e1);
+	d.add(e2);
+
+	d.show();
+
+	cout << "+\n";
+}
+
+void Solver::testButterworthFilterECG()
+{
+	for (auto it : ECG::reference)
+	{
+		//if (it.second == 'O')
+		{
+			cout << it.first << " " << it.second << "\n";
+			ECG ecg;
+			ECG ecg2;
+
+			ecg.readFromFile("../../../Data/TXT/" + it.first + ".txt");
+
+			if (ecg.data.size() < 8999)
+			{
+				continue;
+			}
+
+			ecg.data = vector<double>(ecg.data.begin(), ecg.data.begin() + 8500);
+			
+			//vector <double> filter1Median = ecg.medianFilter(ecg.medianFilter(ecg.data, 60), 180);
+			vector <double> filter1Median = ecg.medianFilter(ecg.data, 100);
+			ECG ecgFilteredM;
+			ecgFilteredM.drawingColor = Color::Blue;
+			ecgFilteredM.data = ecg.data;
+			for (int i = 0; i < ecg.data.size(); i++)
+			{
+				ecgFilteredM.data[i] -= filter1Median[i] + 1000;
+			}
+
+			ButterworthFilter btwFilter;
+			btwFilter.setParameters(1.0 / 300.0, 109, 10);
+			ECG filteredECG;
+			filteredECG.data = btwFilter.filter(ecg.data);
+			filteredECG.drawingColor = Color::Green;
+			for (int i = 0; i < filteredECG.data.size(); i++)
+			{
+				filteredECG.data[i] -= 2000;
+			}
+			filteredECG.data = vector<double>(filteredECG.data.begin() + 25, filteredECG.data.end());
+
+			Drawer d;
+
+			d.add(ecg);
+			d.add(ecgFilteredM);
+			d.add(filteredECG);
+			d.addGraph(filter1Median, 0, Color::Blue);
+
+			d.show();
+		}
+	}
 
 
 }

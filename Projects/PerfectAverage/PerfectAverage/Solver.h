@@ -31,5 +31,7 @@ public:
 
 	void solve2();
 
+	void testButterworthFilterSin();
 
+	void testButterworthFilterECG();
 };
