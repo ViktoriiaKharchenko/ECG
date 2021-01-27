@@ -1,5 +1,60 @@
 #include "ButterworthFilter.h"
 
+vector <double> ButterworthFilter::shiftResult(vector <double> y, vector <double> x, int startDelay)
+{
+	const int searchLength = 200;
+
+	vector <int> dxs;
+
+	for (int k = 1; k < 10; k++)
+	{
+
+
+		int l = y.size() / 11 * k, r = y.size() / 11 * (k + 1);
+
+		int maxPosX = l, maxPosY;
+
+		for (int i = l; i <= r; i++)
+		{
+			if (abs(x[maxPosX]) < abs(x[i]))
+			{
+				maxPosX = i;
+			}
+		}
+
+		maxPosY = maxPosX;
+		for (int i = maxPosX; i < maxPosX + searchLength; i++)
+		{
+			if (abs(y[maxPosY]) < abs(y[i]))
+			{
+				maxPosY = i;
+			}
+		}
+
+		int dx = maxPosY - maxPosX;
+
+		dxs.push_back(dx);
+	}
+
+	sort(dxs.begin(), dxs.end());
+
+	int dx = dxs[dxs.size() / 2];
+
+	vector <double> shiftedECG;
+
+	for (int i = startDelay + dx; i < y.size(); i++)
+	{
+		shiftedECG.push_back(y[i]);
+	}
+
+	while (shiftedECG.size() + startDelay < x.size())
+	{
+		shiftedECG.push_back(shiftedECG.back());
+	}
+
+	return shiftedECG;
+}
+
 void ButterworthFilter::setParameters(double TSample, double cutoffFrequency, int filterOrder)
 {
 	//TSample = 1.0; //
@@ -136,6 +191,20 @@ void ButterworthFilter::setParameters(double TSample, double cutoffFrequency, in
 
 vector <double> ButterworthFilter::filter(vector <double> x)
 {
+	const int startDelay = 100;
+
+	vector <double> newX;
+	for (int i = 0; i < startDelay; i++)
+	{
+		newX.push_back(x[0]);
+	}
+	for (auto it : x)
+	{
+		newX.push_back(it);
+	}
+
+	x = newX;
+
 	vector <double> y;
 
 	for (int i = 0; i < x.size(); i++)
@@ -154,5 +223,5 @@ vector <double> ButterworthFilter::filter(vector <double> x)
 		y.push_back(a);
 	}
 
-	return y;
+	return shiftResult(y, x, startDelay);
 }

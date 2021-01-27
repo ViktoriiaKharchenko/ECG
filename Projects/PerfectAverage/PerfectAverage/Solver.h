@@ -34,4 +34,6 @@ public:
 	void testButterworthFilterSin();
 
 	void testButterworthFilterECG();
+
+	void solve3();
 };

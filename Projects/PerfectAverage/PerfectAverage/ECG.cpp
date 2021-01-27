@@ -1,9 +1,16 @@
 #include "ECG.h"
 
-ECG::ECG()
+ECG::ECG() : numbersPerSecond(300), MaxPeakDuration(18), HalfPeakDuration(9)
 {
 	drawingColor = Color::Black;
 }
+
+ECG::ECG(int _numbersPerSecond) : numbersPerSecond(_numbersPerSecond), MaxPeakDuration(int(0.06 * numbersPerSecond / 2.0 + 0.5) * 2),
+							HalfPeakDuration(MaxPeakDuration / 2)
+{
+	drawingColor = Color::Black;
+}
+
 
 void ECG::initType()
 {
@@ -41,9 +48,6 @@ bool ECG::readFromFile(string path)
 
 	return true;
 }
-
-const int ECG::MaxPeakDuration = 16;
-const int ECG::HalfPeakDuration = ECG::MaxPeakDuration / 2;
 
 vector <double> ECG::averageFilter(vector <double> _data, int D)
 {
@@ -185,22 +189,53 @@ vector <double> ECG::transformPeaks1(int l, int r)
 		}
 	}
 
-
 	return transform;
 }
 
 vector <int> ECG::getRPeaks(int l, int r)
 {
 	vector <double> transform = transformPeaks1(l, r);
+
 	vector <int> isPeak(r - l, 0);
 
 	int windowSize = numbersPerSecond * 1.5;
 	int windowShift = numbersPerSecond * 0.2;
 	int minBeatTimeLeft = numbersPerSecond * 0.35;
 	int minBeatTimeRight = numbersPerSecond * 0.25;
-	int sameBeatPeackThreshold = numbersPerSecond * 0.2;
+	int sameBeatPeakThreshold = numbersPerSecond * 0.2;
+	
+	int n = r - l;
+	int minBeatTimeSum = minBeatTimeLeft + minBeatTimeRight + 1;
 
-	for (int i = 0; i + windowSize <= r - l; i += windowShift)
+	while (transform.size() % minBeatTimeSum != 0) { transform.push_back(0); }
+
+	vector <double> transformMaxPref(transform.size()), transformMaxSuff(transform.size());
+	transformMaxSuff[transform.size() - 1] = transform[transform.size() - 1];
+	
+	for (int i = 0; i < transform.size(); i++)
+	{
+		if (i % minBeatTimeSum == 0)
+		{
+			transformMaxPref[i] = transform[i];
+		}
+		else
+		{
+			transformMaxPref[i] = max(transformMaxPref[i - 1], transform[i]);
+		}
+	}
+	for (int i = transform.size() - 2; i >= 0; i--)
+	{
+		if (i % minBeatTimeSum == minBeatTimeSum - 1)
+		{
+			transformMaxSuff[i] = transform[i];
+		}
+		else
+		{
+			transformMaxSuff[i] = max(transformMaxSuff[i + 1], transform[i]);
+		}
+	}
+
+	for (int i = 0; i + windowSize <= n; i += windowShift)
 	{
 		vector <pair<double, int> > windowInf;
 
@@ -228,10 +263,19 @@ vector <int> ECG::getRPeaks(int l, int r)
 	{
 		if (isPeak[i] == 1)
 		{
-			double mx = 0;
-			for (int j = max(0, i - minBeatTimeLeft); j < min(r - l, i + minBeatTimeRight); j++)
+			double mx;
+
+			if (i - minBeatTimeLeft < 0)
 			{
-				mx = max(mx, transform[j]);
+				mx = transformMaxPref[i + minBeatTimeRight];
+			}
+			else if (i + minBeatTimeRight >= n)
+			{
+				mx = transformMaxSuff[i - minBeatTimeLeft];
+			}
+			else
+			{
+				mx = max(transformMaxPref[i + minBeatTimeRight], transformMaxSuff[i - minBeatTimeLeft]);
 			}
 
 			if (transform[i] * 2 < mx)
@@ -245,14 +289,14 @@ vector <int> ECG::getRPeaks(int l, int r)
 	{
 		if (isPeak[i] == 1)
 		{
-			int ost = sameBeatPeackThreshold;
+			int ost = sameBeatPeakThreshold;
 			int j;
 
-			for (j = i + 1; j < r - l; j++)
+			for (j = i + 1; j < n; j++)
 			{
 				if (isPeak[j] == 1)
 				{
-					ost = sameBeatPeackThreshold;
+					ost = sameBeatPeakThreshold;
 				}
 				else
 				{
@@ -263,6 +307,11 @@ vector <int> ECG::getRPeaks(int l, int r)
 						break;
 					}
 				}
+			}
+
+			if (j == n) 
+			{
+				j--;
 			}
 
 			int bestPos = i;
@@ -278,6 +327,8 @@ vector <int> ECG::getRPeaks(int l, int r)
 			}
 
 			isPeak[bestPos] = 1;
+
+			i = j;
 		}
 	}
 

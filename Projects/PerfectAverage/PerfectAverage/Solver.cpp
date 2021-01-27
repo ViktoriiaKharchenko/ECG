@@ -239,3 +239,59 @@ void Solver::testButterworthFilterECG()
 
 
 }
+
+void Solver::solve3()
+{
+	// filtering + R peak detection
+
+	for (auto it : ECG::reference)
+	{
+		//if (it.second == 'N')
+		{
+			// read ECG
+			cout << it.first << " " << it.second << "\n";
+			ECG ecg;
+
+			ecg.readFromFile("../../../Data/TXT/" + it.first + ".txt");
+			cout << ecg.data.size() << endl;
+			if (ecg.data.size() < 8999)
+			{
+				continue;
+			}
+
+			// median filter
+			vector <double> filter1 = ecg.medianFilter(ecg.data, 100);
+			for (int i = 0; i < filter1.size(); i++)
+			{
+				filter1[i] =  ecg.data[i] - filter1[i];
+			}
+
+			// butterworth filter
+
+			ButterworthFilter btw;
+			btw.setParameters(1.0 / 300.0, 35.0 * M_PI, 10);
+			
+			ECG filteredEcg;
+			filteredEcg.drawingColor = Color::Blue;
+			filteredEcg.data = btw.filter(filter1);
+
+			for (auto& it : filteredEcg.data)
+			{
+				it += 1500;
+			}
+
+			vector <int> peaks = filteredEcg.getRPeaks(0, filteredEcg.data.size());
+
+			Drawer d;
+
+			d.add(ecg);
+			d.add(filteredEcg);
+			for (auto it : peaks)
+			{
+				d.addVerticalLine(it);
+			}
+
+			d.show();
+		}
+	}
+}

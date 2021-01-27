@@ -14,21 +14,22 @@ using namespace sf;
 
 class ECG
 {
-	const static int MaxPeakDuration;
-	const static int HalfPeakDuration;
+	const int MaxPeakDuration;
+	const int HalfPeakDuration;
 
 public:
 	
 	static map<string, char> reference;
 	static void initType();
 
-	const static int numbersPerSecond = 300.0;
+	const int numbersPerSecond;
 
 	vector <double> data;
 
 	Color drawingColor;
 
 	ECG();
+	ECG(int _numbersPerSecond);
 	bool readFromFile(string path);
 
 	vector <double> averageFilter(vector <double> _data, int D);

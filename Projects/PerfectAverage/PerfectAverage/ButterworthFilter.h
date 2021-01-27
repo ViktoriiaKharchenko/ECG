@@ -13,6 +13,7 @@ class ButterworthFilter
 {
 	vector <double> xCoefs, yCoefs;
 
+	vector <double> shiftResult(vector <double> y, vector <double> x, int startDelay);
 
 public:
 
