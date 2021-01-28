@@ -31,6 +31,7 @@ public:
 	ECG();
 	ECG(int _numbersPerSecond);
 	bool readFromFile(string path);
+	bool readFromFile2(string path);
 
 	vector <double> averageFilter(vector <double> _data, int D);
 	vector <double> medianFilter(vector <double> _data, int D);

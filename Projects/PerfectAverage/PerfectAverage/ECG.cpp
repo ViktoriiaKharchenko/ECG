@@ -49,6 +49,27 @@ bool ECG::readFromFile(string path)
 	return true;
 }
 
+bool ECG::readFromFile2(string path)
+{
+	ifstream in(path);
+
+	if (!in.is_open())
+	{
+		return false;
+	}
+
+	data.clear();
+
+	double val;
+	while (in >> val)
+	{
+		val *= 1000;
+		data.push_back(val);
+	}
+
+	return true;
+}
+
 vector <double> ECG::averageFilter(vector <double> _data, int D)
 {
 	vector <double> pref;

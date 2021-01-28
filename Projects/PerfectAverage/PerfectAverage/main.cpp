@@ -7,9 +7,9 @@ int main()
 
 	Solver s;
 
-	s.solve3();
+	//s.solve3();
 
-	//s.testButterworthFilterECG();
+	s.makeRPeaksCSV2();
 
 	return 0;
 }

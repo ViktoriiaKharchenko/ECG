@@ -275,14 +275,14 @@ void Solver::solve3()
 			filteredEcg.drawingColor = Color::Blue;
 			filteredEcg.data = btw.filter(filter1);
 
+			vector <int> peaks = filteredEcg.getRPeaks(0, filteredEcg.data.size());
+
+			Drawer d;
+
 			for (auto& it : filteredEcg.data)
 			{
 				it += 1500;
 			}
-
-			vector <int> peaks = filteredEcg.getRPeaks(0, filteredEcg.data.size());
-
-			Drawer d;
 
 			d.add(ecg);
 			d.add(filteredEcg);
@@ -293,5 +293,78 @@ void Solver::solve3()
 
 			d.show();
 		}
+	}
+}
+
+void Solver::makeRPeaksCSV2()
+{
+	string ts;
+	vector<string> records;
+
+	ifstream in("../../../Data/CSV2/RECORDS");
+
+	while (in >> ts)
+	{
+		records.push_back(ts);
+	}
+
+	in.close();
+
+	for (auto name : records)
+	{
+		// read ECG
+		cout << name << "\n";
+		ECG ecg(360);
+
+		ecg.readFromFile2("../../../Data/CSV2/" + name + ".csv");
+		cout << ecg.data.size() << endl;
+
+		//ecg.data = vector<double>(ecg.data.begin(), ecg.data.begin() + 2700);
+		
+		// median filter
+		vector <double> filter1 = ecg.medianFilter(ecg.data, ecg.numbersPerSecond * 0.35);
+		for (int i = 0; i < filter1.size(); i++)
+		{
+			filter1[i] = ecg.data[i] - filter1[i];
+		}
+
+		// butterworth filter
+
+		ButterworthFilter btw;
+		btw.setParameters(1.0 / ecg.numbersPerSecond, 35.0 * M_PI, 10);
+
+		ECG filteredEcg;
+		filteredEcg.drawingColor = Color::Blue;
+		filteredEcg.data = btw.filter(filter1);
+
+		vector <int> peaks = filteredEcg.getRPeaks(0, filteredEcg.data.size());
+		cout << "find " << peaks.size() << " R peaks\n";
+
+		/*
+		ofstream out("../../../Data/CSV2RPeaksOurAlgorithm/" + name + ".txt");
+		for (auto it : peaks)
+		{
+			out << it << "\n";
+		}
+		out.close();
+		*/
+
+		/*
+		Drawer d;
+
+		for (auto& it : filteredEcg.data)
+		{
+			it += 500;
+		}
+
+		d.add(ecg);
+		d.add(filteredEcg);
+		for (auto it : peaks)
+		{
+			d.addVerticalLine(it);
+		}
+
+		d.show();
+		*/
 	}
 }

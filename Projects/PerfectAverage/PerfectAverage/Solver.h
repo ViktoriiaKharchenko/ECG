@@ -36,4 +36,6 @@ public:
 	void testButterworthFilterECG();
 
 	void solve3();
+
+	void makeRPeaksCSV2();
 };
