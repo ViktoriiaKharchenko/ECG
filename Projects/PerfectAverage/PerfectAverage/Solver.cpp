@@ -312,6 +312,8 @@ void Solver::makeRPeaksCSV2()
 
 	for (auto name : records)
 	{
+		name = "104";
+
 		// read ECG
 		cout << name << "\n";
 		ECG ecg(360);
@@ -319,7 +321,7 @@ void Solver::makeRPeaksCSV2()
 		ecg.readFromFile2("../../../Data/CSV2/" + name + ".csv");
 		cout << ecg.data.size() << endl;
 
-		//ecg.data = vector<double>(ecg.data.begin(), ecg.data.begin() + 2700);
+		ecg.data = vector<double>(ecg.data.begin() + 40604 - 1000, ecg.data.begin() + 40604 + 1000);
 		
 		// median filter
 		vector <double> filter1 = ecg.medianFilter(ecg.data, ecg.numbersPerSecond * 0.35);
@@ -349,12 +351,12 @@ void Solver::makeRPeaksCSV2()
 		out.close();
 		*/
 
-		/*
+		
 		Drawer d;
 
 		for (auto& it : filteredEcg.data)
 		{
-			it += 500;
+			it += 1500;
 		}
 
 		d.add(ecg);
@@ -365,6 +367,113 @@ void Solver::makeRPeaksCSV2()
 		}
 
 		d.show();
-		*/
+		
+		break;
+	}
+}
+
+void Solver::calcAlgorithmStatsCSV2()
+{
+	string ts;
+	vector<string> records;
+
+	ifstream in("../../../Data/CSV2/RECORDS");
+
+	while (in >> ts)
+	{
+		records.push_back(ts);
+	}
+
+	in.close();
+
+	for (auto name : records)
+	{
+		//ecg.readFromFile2("../../../Data/CSV2/" + name + ".csv");
+		//cout << ecg.data.size() << endl;
+
+		name = "101";
+
+		int val, tp;
+		double _val;
+
+		vector <int> myPeaks;
+		vector <int> referencePeaks;
+
+		ifstream inMy("../../../Data/CSV2RPeaksOurAlgorithm/" + name + ".txt");
+		while (inMy >> val)
+		{
+			myPeaks.push_back(val);
+		}
+		inMy.close();
+		
+		ifstream inRef("../../../Data/CSVatrTime/" + name + "atr.csv");
+		ifstream inRefType("../../../Data/CSVatr/" + name + "atr.csv");
+		while (inRef >> _val)
+		{
+			inRefType >> tp;
+			val = _val * 360;
+
+			//if (tp <= 20)
+			{
+				referencePeaks.push_back(val);
+			}
+		}
+		inRef.close();
+		inRefType.close();
+		
+		set<int> peaks, reference;
+		for (auto it : myPeaks)
+		{
+			peaks.insert(it);
+		}
+		for (auto it : referencePeaks)
+		{
+			reference.insert(it);
+		}
+
+		const int maxR = 60;
+
+		int ok = 0, fp = 0, fn = 0;
+
+		cout << reference.size() << "\n";
+
+		for (auto it : myPeaks)
+		{
+			val = it - maxR;
+
+			auto iter = reference.lower_bound(val);
+
+			if (iter != reference.end())
+			{
+				if (abs(it - *iter) <= maxR)
+				{
+					ok++;
+
+					peaks.erase(it);
+					reference.erase(iter);
+				}
+			}
+		}
+
+		fp = peaks.size();
+		fn = reference.size();
+		
+		cout << "name=" << name << "   \tok = " << ok << "   \tfp = " << fp << "   \tfn = " << fn << "\n";
+
+		cout << "fp:\n";
+		for (auto it : peaks)
+		{
+			cout << it << " ";
+		}
+		cout << "\n";
+
+		cout << "fn:\n";
+		for (auto it : reference)
+		{
+			cout << it << " ";
+		}
+		cout << "\n";
+
+		break;
 	}
 }

@@ -38,4 +38,6 @@ public:
 	void solve3();
 
 	void makeRPeaksCSV2();
+
+	void calcAlgorithmStatsCSV2();
 };
