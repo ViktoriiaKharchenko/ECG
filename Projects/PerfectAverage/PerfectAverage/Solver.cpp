@@ -321,7 +321,7 @@ void Solver::makeRPeaksCSV2()
 		ecg.readFromFile2("../../../Data/CSV2/" + name + ".csv");
 		cout << ecg.data.size() << endl;
 
-		ecg.data = vector<double>(ecg.data.begin() + 40604 - 1000, ecg.data.begin() + 40604 + 1000);
+		ecg.data = vector<double>(ecg.data.begin() + 40604 - 1000, ecg.data.begin() + 649980 + 1000);
 		
 		// median filter
 		vector <double> filter1 = ecg.medianFilter(ecg.data, ecg.numbersPerSecond * 0.35);
@@ -341,16 +341,6 @@ void Solver::makeRPeaksCSV2()
 
 		vector <int> peaks = filteredEcg.getRPeaks(0, filteredEcg.data.size());
 		cout << "find " << peaks.size() << " R peaks\n";
-
-		/*
-		ofstream out("../../../Data/CSV2RPeaksOurAlgorithm/" + name + ".txt");
-		for (auto it : peaks)
-		{
-			out << it << "\n";
-		}
-		out.close();
-		*/
-
 		
 		Drawer d;
 
@@ -372,6 +362,82 @@ void Solver::makeRPeaksCSV2()
 	}
 }
 
+void Solver::drawPart(string ecgPath, string filteredPath, string myPeaksPath, string refPeaksPath, int l, int r)
+{
+	int mid = (l + r) / 2;
+
+	if (l < 0)
+	{
+		l = 0;
+	}
+	if (r >= 650000)
+	{
+		r = 649999;
+	}
+
+	mid -= l;
+
+	int pos;
+	double _pos;
+
+	ECG ecgOriginal, ecgFiltered;
+
+	ecgOriginal.readFromFile2(ecgPath);
+	ecgFiltered.readFromFile(filteredPath);
+
+	ecgOriginal.data = vector <double>(ecgOriginal.data.begin() + l, ecgOriginal.data.begin() + r);
+	ecgFiltered.data = vector <double>(ecgFiltered.data.begin() + l, ecgFiltered.data.begin() + r);
+
+	ecgFiltered.drawingColor = Color::Blue;
+	for (auto& it : ecgFiltered.data)
+	{
+		it -= 2500;
+	}
+
+	vector <int> myPeaks, refPeaks;
+
+	ifstream inMy(myPeaksPath);
+	while (inMy >> pos)
+	{
+		if (l <= pos && pos <= r)
+		{
+			myPeaks.push_back(pos);
+		}
+	}
+	inMy.close();
+
+	ifstream inRef(refPeaksPath);
+	while (inRef >> _pos)
+	{
+		pos = _pos * 360.0;
+		if (l <= pos && pos <= r)
+		{
+			refPeaks.push_back(pos);
+		}
+	}
+	inRef.close();
+
+	Drawer d;
+
+	
+	for (auto it : myPeaks)
+	{
+		d.addVerticalLine(it - l, Color::Green);
+	}
+	for (auto it : refPeaks)
+	{
+		d.addVerticalLine(it - l - 3, Color::Red);
+		d.addVerticalLine(it - l + 3, Color::Red);
+		//d.addVerticalLine(it - l, Color::Red);
+	}
+	d.addVerticalLine(mid - 15, Color::Magenta);
+	d.addVerticalLine(mid + 15, Color::Magenta);
+	d.add(ecgOriginal);
+	d.add(ecgFiltered);
+
+	d.show();
+}
+
 void Solver::calcAlgorithmStatsCSV2()
 {
 	string ts;
@@ -386,12 +452,16 @@ void Solver::calcAlgorithmStatsCSV2()
 
 	in.close();
 
+	int isOkType[50] = { 0 };
+	isOkType[1] = isOkType[2] = isOkType[3] = isOkType[4] = isOkType[5] = isOkType[6] = isOkType[7] = isOkType[8] = 1;
+	isOkType[9] = isOkType[10] = isOkType[11] = isOkType[12] = isOkType[13] = isOkType[31] = isOkType[34] = isOkType[38] = 1;
+
 	for (auto name : records)
 	{
 		//ecg.readFromFile2("../../../Data/CSV2/" + name + ".csv");
 		//cout << ecg.data.size() << endl;
 
-		name = "101";
+		//name = "109";
 
 		int val, tp;
 		double _val;
@@ -413,7 +483,7 @@ void Solver::calcAlgorithmStatsCSV2()
 			inRefType >> tp;
 			val = _val * 360;
 
-			//if (tp <= 20)
+			if (isOkType[tp] == 1)
 			{
 				referencePeaks.push_back(val);
 			}
@@ -455,25 +525,126 @@ void Solver::calcAlgorithmStatsCSV2()
 			}
 		}
 
+		// erase start and end
+		while (peaks.size() != 0 && *peaks.begin() < 360)
+		{
+			peaks.erase(peaks.begin());
+		}
+		while (peaks.size() != 0 && *(--peaks.end()) > 650000 - 360)
+		{
+			peaks.erase(--peaks.end());
+		}
+		while (reference.size() != 0 && *reference.begin() < 360)
+		{
+			reference.erase(reference.begin());
+		}
+		while (reference.size() != 0 && *(--reference.end()) > 650000 - 360)
+		{
+			reference.erase(--reference.end());
+		}
+
 		fp = peaks.size();
 		fn = reference.size();
 		
 		cout << "name=" << name << "   \tok = " << ok << "   \tfp = " << fp << "   \tfn = " << fn << "\n";
 
+		/*
 		cout << "fp:\n";
 		for (auto it : peaks)
 		{
 			cout << it << " ";
+
+			drawPart("../../../Data/CSV2/" + name + ".csv", "../../../Data/CSV2Filtered/" + name + ".txt", 
+				"../../../Data/CSV2RPeaksOurAlgorithm/" + name + ".txt", "../../../Data/CSVatrTime/" + name + "atr.csv", it - 2000, it + 2000);
 		}
 		cout << "\n";
+		*/
 
+		/*
 		cout << "fn:\n";
 		for (auto it : reference)
 		{
 			cout << it << " ";
+
+			drawPart("../../../Data/CSV2/" + name + ".csv", "../../../Data/CSV2Filtered/" + name + ".txt",
+				"../../../Data/CSV2RPeaksOurAlgorithm/" + name + ".txt", "../../../Data/CSVatrTime/" + name + "atr.csv", it - 2000, it + 2000);
 		}
 		cout << "\n";
+		*/
 
-		break;
+		//break;
+	}
+}
+
+void Solver::showAllTypes()
+{
+	string ts;
+	vector<string> records;
+
+	ifstream in("../../../Data/CSV2/RECORDS");
+
+	while (in >> ts)
+	{
+		records.push_back(ts);
+	}
+
+	in.close();
+
+	set <int> allTypes;
+	map<int, int> cntTypes;
+
+	for (auto name : records)
+	{
+		//ecg.readFromFile2("../../../Data/CSV2/" + name + ".csv");
+		//cout << ecg.data.size() << endl;
+
+		//name = "109";
+
+		int val, tp;
+		double _val;
+
+		vector <int> myPeaks;
+		vector <int> referencePeaks;
+
+		ifstream inMy("../../../Data/CSV2RPeaksOurAlgorithm/" + name + ".txt");
+		while (inMy >> val)
+		{
+			myPeaks.push_back(val);
+		}
+		inMy.close();
+
+		ifstream inRef("../../../Data/CSVatrTime/" + name + "atr.csv");
+		ifstream inRefType("../../../Data/CSVatr/" + name + "atr.csv");
+		while (inRef >> _val)
+		{
+			inRefType >> tp;
+			val = _val * 360;
+
+			cntTypes[tp]++;
+
+			/*
+			if (tp == 38)
+			{
+				drawPart("../../../Data/CSV2/" + name + ".csv", "../../../Data/CSV2Filtered/" + name + ".txt",
+					"../../../Data/CSV2RPeaksOurAlgorithm/" + name + ".txt", "../../../Data/CSVatrTime/" + name + "atr.csv", val - 1000, val + 1000);
+			}
+			*/
+
+			if (allTypes.find(tp) == allTypes.end())
+			{
+				allTypes.insert(tp);
+
+				cout << "type == " << tp << "\n\n";
+				drawPart("../../../Data/CSV2/" + name + ".csv", "../../../Data/CSV2Filtered/" + name + ".txt",
+					"../../../Data/CSV2RPeaksOurAlgorithm/" + name + ".txt", "../../../Data/CSVatrTime/" + name + "atr.csv", val - 1000, val + 1000);
+			}
+		}
+		inRef.close();
+		inRefType.close();
+	}
+
+	for (auto it : cntTypes)
+	{
+		cout << it.first << " " << it.second << "\n";
 	}
 }

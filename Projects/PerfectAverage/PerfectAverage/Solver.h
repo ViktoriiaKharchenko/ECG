@@ -39,5 +39,9 @@ public:
 
 	void makeRPeaksCSV2();
 
+	void drawPart(string ecgPath, string filteredPath, string myPeaksPath, string refPeaksPath, int l, int r);
+
 	void calcAlgorithmStatsCSV2();
+
+	void showAllTypes();
 };

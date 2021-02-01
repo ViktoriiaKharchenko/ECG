@@ -104,20 +104,20 @@ void Drawer::draw(RenderWindow& window)
 {
 	window.clear(Color::White);
 
-	for (auto gline : toDrawLines)
-	{
-		Vertex line[2] = { Vertex(Vector2f(gline.p1.x, gline.p1.y)), Vertex(Vector2f(gline.p2.x, gline.p2.y)) };
-		line[0].color = gline.c;
-		line[1].color = gline.c;
-
-		window.draw(line, 2, Lines);
-	}
-
 	for (auto vLine : verticalLines)
 	{
 		Vertex line[2] = { Vertex(Vector2f(vLine.first, 0)), Vertex(Vector2f(vLine.first, window.getSize().y)) };
 		line[0].color = vLine.second;
 		line[1].color = vLine.second;
+
+		window.draw(line, 2, Lines);
+	}
+
+	for (auto gline : toDrawLines)
+	{
+		Vertex line[2] = { Vertex(Vector2f(gline.p1.x, gline.p1.y)), Vertex(Vector2f(gline.p2.x, gline.p2.y)) };
+		line[0].color = gline.c;
+		line[1].color = gline.c;
 
 		window.draw(line, 2, Lines);
 	}

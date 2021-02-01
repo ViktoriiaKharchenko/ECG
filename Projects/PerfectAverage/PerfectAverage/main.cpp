@@ -7,9 +7,11 @@ int main()
 
 	Solver s;
 
-	s.makeRPeaksCSV2();
+	//s.makeRPeaksCSV2();
 
-	//s.calcAlgorithmStatsCSV2();
+	s.calcAlgorithmStatsCSV2();
+
+	//s.showAllTypes();
 
 	return 0;
 }
