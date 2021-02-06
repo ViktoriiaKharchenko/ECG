@@ -37,5 +37,6 @@ public:
 	vector <double> medianFilter(vector <double> _data, int D);
 
 	vector <double> transformPeaks1(int l, int r);
-	vector <int> getRPeaks(int l, int r);
+	vector <int> getRPeaks(int l, int r, double WSiseP = 1.75, double WSiftP = 0.1,
+		double MBTLeftP = 0.39, double MBTRightP = 0.3, double SBPThresholdP = 0.25);
 };

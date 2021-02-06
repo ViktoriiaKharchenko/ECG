@@ -5,8 +5,8 @@ ECG::ECG() : numbersPerSecond(300), MaxPeakDuration(18), HalfPeakDuration(9)
 	drawingColor = Color::Black;
 }
 
-ECG::ECG(int _numbersPerSecond) : numbersPerSecond(_numbersPerSecond), MaxPeakDuration(int(0.06 * numbersPerSecond / 2.0 + 0.5) * 2),
-							HalfPeakDuration(MaxPeakDuration / 2)
+ECG::ECG(int _numbersPerSecond) : numbersPerSecond(_numbersPerSecond), MaxPeakDuration(int(0.06 * _numbersPerSecond / 2.0 + 0.5) * 2),
+							HalfPeakDuration(int(0.06 * _numbersPerSecond / 2.0 + 0.5) / 2)
 {
 	drawingColor = Color::Black;
 }
@@ -213,17 +213,18 @@ vector <double> ECG::transformPeaks1(int l, int r)
 	return transform;
 }
 
-vector <int> ECG::getRPeaks(int l, int r)
+vector <int> ECG::getRPeaks(int l, int r, double WSiseP, double WSiftP,
+	double MBTLeftP, double MBTRightP, double SBPThresholdP)
 {
 	vector <double> transform = transformPeaks1(l, r);
 
 	vector <int> isPeak(r - l, 0);
 
-	int windowSize = numbersPerSecond * 1.5;
-	int windowShift = numbersPerSecond * 0.2;
-	int minBeatTimeLeft = numbersPerSecond * 0.35;
-	int minBeatTimeRight = numbersPerSecond * 0.25;
-	int sameBeatPeakThreshold = numbersPerSecond * 0.2;
+	int windowSize = numbersPerSecond * WSiseP; // 1.25, 1.5, 1.75, 2.0, 2.25
+	int windowShift = numbersPerSecond * WSiftP; // 0.1, 0.2, 0.3, 0.45, 0.6, 0.8
+	int minBeatTimeLeft = numbersPerSecond * MBTLeftP; // 0.27, 0.31, 0.35, 0.39, 0.43
+	int minBeatTimeRight = numbersPerSecond * MBTRightP; // 0.2, 0.225, 0.25, 0.275, 0.3
+	int sameBeatPeakThreshold = numbersPerSecond * SBPThresholdP; // 0.15, 0.2, 0.25, 0.3
 	
 	int n = r - l;
 	int minBeatTimeSum = minBeatTimeLeft + minBeatTimeRight + 1;
@@ -266,6 +267,8 @@ vector <int> ECG::getRPeaks(int l, int r)
 		}
 
 		sort(windowInf.begin(), windowInf.end());
+
+
 
 		double threshold = max(windowInf[windowInf.size() * 95 / 100].first, windowInf.back().first / 4.0);
 

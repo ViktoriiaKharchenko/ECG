@@ -10,6 +10,8 @@
 
 #include "Drawer.h"
 
+#include "TasksQueue.h"
+
 using namespace std;
 using namespace sf;
 
@@ -23,7 +25,6 @@ class Solver
 	double var(vector <double> peaks, double mean);
 
 	vector <double> filterDiff(vector <double> diff);
-
 
 public:
 
@@ -39,9 +40,17 @@ public:
 
 	void makeRPeaksCSV2();
 
-	void drawPart(string ecgPath, string filteredPath, string myPeaksPath, string refPeaksPath, int l, int r);
+	void drawPart(string ecgPath, string filteredPath, string myPeaksPath, string refPeaksPath, string name, int l, int r);
 
 	void calcAlgorithmStatsCSV2();
 
 	void showAllTypes();
+
+	void computeRPeaksDetectionResults();
+
+	void analyzeComputedStats1();
+
+	void analyzeComputedStats2();
+
+	void analyzeComputedStats3();
 };

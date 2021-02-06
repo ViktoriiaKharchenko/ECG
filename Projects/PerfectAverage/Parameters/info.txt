@@ -1,0 +1,6 @@
+- window size
+- window shift
+- minBeatTimeLeft
+- minBeatTimeRight
+- sameBeatPeakThreshold
+- possiblePeaksQ
