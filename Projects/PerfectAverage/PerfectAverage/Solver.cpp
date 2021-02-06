@@ -259,12 +259,26 @@ void Solver::solve3()
 				//continue;
 			}
 
+			/*
+			if (ecg.data.size() > 4000)
+			{
+				ecg.data = vector <double>(ecg.data.begin(), ecg.data.begin() + 4000);
+			}
+			*/
+
 			// median filter
+			ECG ecgMedian;
+			ecgMedian.drawingColor = Color::Blue;
 			vector <double> filter1 = ecg.medianFilter(ecg.data, 100);
+			ecgMedian.data = filter1;
 			for (int i = 0; i < filter1.size(); i++)
 			{
 				filter1[i] =  ecg.data[i] - filter1[i];
 			}
+
+			ECG ecgFilteredMedian;
+			ecgFilteredMedian.drawingColor = Color::Blue;
+			ecgFilteredMedian.data = filter1;
 
 			// butterworth filter
 
@@ -272,20 +286,36 @@ void Solver::solve3()
 			btw.setParameters(1.0 / 300.0, 35.0 * M_PI, 10);
 			
 			ECG filteredEcg;
-			filteredEcg.drawingColor = Color::Blue;
+			filteredEcg.drawingColor = Color::Green;
 			filteredEcg.data = btw.filter(filter1);
 
-			/*
+			
 			vector <int> peaks = filteredEcg.getRPeaks(0, filteredEcg.data.size());
+
+			/*
+			ofstream out("../../../Data/RPeaks/" + it.first + ".txt");
+			for (auto it : peaks)
+			{
+				out << it << "\n";
+			}
+			out.close();
+			*/
 
 			Drawer d;
 
+			for (auto& it : ecgFilteredMedian.data)
+			{
+				it -= 1000;
+			}
+
 			for (auto& it : filteredEcg.data)
 			{
-				it += 1500;
+				it -= 2000;
 			}
 
 			d.add(ecg);
+			d.add(ecgMedian);
+			d.add(ecgFilteredMedian);
 			d.add(filteredEcg);
 			for (auto it : peaks)
 			{
@@ -293,14 +323,15 @@ void Solver::solve3()
 			}
 
 			d.show();
-			*/
 
+			/*
 			ofstream out("../../../Data/TXTFiltered/" + it.first + ".txt");
-			for (auto it : ecg.data)
+			for (auto it : filteredEcg.data)
 			{
 				out << it << "\n";
 			}
 			out.close();
+			*/
 		}
 	}
 }
