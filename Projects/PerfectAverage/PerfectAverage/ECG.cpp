@@ -6,7 +6,7 @@ ECG::ECG() : numbersPerSecond(300), MaxPeakDuration(18), HalfPeakDuration(9)
 }
 
 ECG::ECG(int _numbersPerSecond) : numbersPerSecond(_numbersPerSecond), MaxPeakDuration(int(0.06 * _numbersPerSecond / 2.0 + 0.5) * 2),
-							HalfPeakDuration(int(0.06 * _numbersPerSecond / 2.0 + 0.5) / 2)
+							HalfPeakDuration(int(0.06 * _numbersPerSecond / 2.0 + 0.5))
 {
 	drawingColor = Color::Black;
 }

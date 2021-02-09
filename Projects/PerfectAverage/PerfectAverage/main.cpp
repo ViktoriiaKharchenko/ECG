@@ -7,7 +7,7 @@ int main()
 
 	Solver s;
 
-	s.solve3();
+	//s.solve3();
 
 	//s.makeRPeaksCSV2();
 

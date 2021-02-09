@@ -279,6 +279,7 @@ void Solver::solve3()
 			ECG ecgFilteredMedian;
 			ecgFilteredMedian.drawingColor = Color::Blue;
 			ecgFilteredMedian.data = filter1;
+			ecgFilteredMedian.data = ecg.transformPeaks1(0, ecg.data.size());
 
 			// butterworth filter
 
@@ -305,7 +306,8 @@ void Solver::solve3()
 
 			for (auto& it : ecgFilteredMedian.data)
 			{
-				it -= 1000;
+				it -= 2000;
+				// it -= 1000
 			}
 
 			for (auto& it : filteredEcg.data)
@@ -316,10 +318,10 @@ void Solver::solve3()
 			d.add(ecg);
 			d.add(ecgMedian);
 			d.add(ecgFilteredMedian);
-			d.add(filteredEcg);
+			//d.add(filteredEcg);
 			for (auto it : peaks)
 			{
-				d.addVerticalLine(it);
+				//d.addVerticalLine(it);
 			}
 
 			d.show();
