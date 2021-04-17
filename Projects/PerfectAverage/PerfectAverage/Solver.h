@@ -32,6 +32,8 @@ public:
 
 	void solve2();
 
+	void drawECG();
+
 	void testButterworthFilterSin();
 
 	void testButterworthFilterECG();
@@ -53,4 +55,14 @@ public:
 	void analyzeComputedStats2();
 
 	void analyzeComputedStats3();
+
+
+	void makeDataForMoisyClasification();
+	void makeDataForMoisyClasification2();
+	void makeDataForMoisyClasification3();
+	void makeDataForNoisyModel();
+
+	void makeDataAFvsNormalScaled();
+
+	void combineNoisyPrediction();
 };

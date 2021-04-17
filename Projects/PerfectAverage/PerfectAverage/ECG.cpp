@@ -153,6 +153,30 @@ vector <double> ECG::medianFilter(vector <double> _data, int D)
 	return res;
 }
 
+vector <double> ECG::rescale(vector <double> data, int size)
+{
+	data.push_back(data.back());
+
+	vector <double> res;
+
+	int n = data.size() - 2;
+	size--;
+
+	for (int i = 0; i <= size; i++)
+	{
+		int i1 = i * n / double(size), i2 = i1 + 1;
+		double t = i / double(size), t1 = i1 / double(n), t2 = i2 / double(n);
+		double dt1 = t - t1, dt2 = t2 - t, tSum = dt1 + dt2;
+
+		dt1 /= tSum;
+		dt2 /= tSum;
+
+		res.push_back(data[i1] * dt2 + data[i2] * dt1);
+	}
+
+	return res;
+}
+
 vector <double> ECG::transformPeaks1(int l, int r)
 {
 	int n = r - l;

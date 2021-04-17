@@ -149,6 +149,88 @@ void Solver::solve2()
 	}
 }
 
+void Solver::drawECG()
+{
+	int cntN = 0, cntA = 0, cntO = 0, cntNoi = 0;
+
+	for (auto it : ECG::reference)
+	{
+		if (it.second == 'N')
+		{
+			cntN++;
+		}
+		if (it.second == 'A')
+		{
+			cntA++;
+		}
+		if (it.second == 'O')
+		{
+			cntO++;
+		}
+		if (it.second == '~')
+		{
+			cntNoi++;
+		}
+
+		//if (it.second == '~')
+		{
+			cout << it.first << " " << it.second << "\n";
+			ECG ecg;
+
+			ecg.readFromFile("../../../Data/TXTFiltered/" + it.first + ".txt");
+
+			//ecg.data = vector <double>(ecg.data.begin(), ecg.data.begin() + 900);
+
+			if (ecg.data.size() < 8999)
+			{
+				//continue;
+			}
+
+			ECG transform = ecg;
+			transform.data.clear();
+			transform.data = ECG::rescale(ecg.data, ecg.data.size() / 2);
+			transform.drawingColor = sf::Color::Blue;
+			for (auto& it : transform.data)
+			{
+				it -= 1000;
+			}
+
+			/*
+			ecg.data = vector<double>(ecg.data.begin(), ecg.data.begin() + 8500);
+
+			//vector <double> filter1Average = ecg.averageFilter(ecg.averageFilter(ecg.data, 60), 180);
+			vector <double> filter1Average = ecg.averageFilter(ecg.data, 100);
+			ECG ecgFilteredA;
+			ecgFilteredA.drawingColor = Color::Green;
+			ecgFilteredA.data = ecg.data;
+			for (int i = 0; i < ecg.data.size(); i++)
+			{
+				ecgFilteredA.data[i] -= filter1Average[i] + 1000;
+			}
+
+			//vector <double> filter1Median = ecg.medianFilter(ecg.medianFilter(ecg.data, 60), 180);
+			vector <double> filter1Median = ecg.medianFilter(ecg.data, 100);
+			ECG ecgFilteredM;
+			ecgFilteredM.drawingColor = Color::Blue;
+			ecgFilteredM.data = ecg.data;
+			for (int i = 0; i < ecg.data.size(); i++)
+			{
+				ecgFilteredM.data[i] -= filter1Median[i] + 2000;
+			}
+			*/
+
+			Drawer d;
+
+			d.add(ecg);
+			d.add(transform);
+
+			d.show();
+
+			//cnt++;
+		}
+	}
+}
+
 void Solver::testButterworthFilterSin()
 {
 	ButterworthFilter btwFilter;
@@ -1135,4 +1217,672 @@ void Solver::analyzeComputedStats3()
 			cout << "ok = " << stats[0] << "  fp = " << stats[1] << "  fn = " << stats[2] << "   " << fixed << errP << "%\n";
 		}
 	}
+}
+
+void Solver::makeDataForMoisyClasification()
+{
+	vector <string> listN, listA, listO, listNo;
+
+	for (auto it : ECG::reference)
+	{
+		if (it.second == 'N')
+		{
+			listN.push_back(it.first);
+		}
+		if (it.second == 'A')
+		{
+			listA.push_back(it.first);
+		}
+		if (it.second == 'O')
+		{
+			listO.push_back(it.first);
+		}
+		if (it.second == '~')
+		{
+			listNo.push_back(it.first);
+		}
+	}
+
+	ofstream out("../../../../NonGitData/NoisyClasification/data4Types.txt");
+	ofstream out2("../../../../NonGitData/NoisyClasification/type4Types.txt");
+	// structure: 900 numbers from ECG
+	// type of ECG (0 - not noisy, 1 - noisy)
+
+	random_shuffle(listN.begin(), listN.end());
+	random_shuffle(listA.begin(), listA.end());
+	random_shuffle(listO.begin(), listO.end());
+	random_shuffle(listNo.begin(), listNo.end());
+
+	cout << listN.size() << " " << listA.size() << " " << listO.size() << " " << listNo.size() << "\n\n";
+
+	//listN.resize(500);
+	//listA.resize(250);
+	//listO.resize(350);
+	
+	for (auto it : listN)
+	{
+		cout << it << " N\n";
+		ECG ecg;
+
+		ecg.readFromFile("../../../Data/TXTFiltered/" + it + ".txt");
+
+		for (int i = 900; i <= ecg.data.size(); i += 900)
+		{
+			vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+			out << data[0];
+			for (int j = 1; j < data.size(); j++)
+			{
+				out << " " << data[j];
+			}
+			out << "\n";
+			out2 << "0\n";
+		}
+	}
+
+	for (auto it : listA)
+	{
+		cout << it << " A\n";
+		ECG ecg;
+
+		ecg.readFromFile("../../../Data/TXTFiltered/" + it + ".txt");
+
+		for (int i = 900; i <= ecg.data.size(); i += 900)
+		{
+			vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+			out << data[0];
+			for (int j = 1; j < data.size(); j++)
+			{
+				out << " " << data[j];
+			}
+			out << "\n";
+			out2 << "1\n";
+		}
+	}
+
+	for (auto it : listO)
+	{
+		cout << it << " O\n";
+		ECG ecg;
+
+		ecg.readFromFile("../../../Data/TXTFiltered/" + it + ".txt");
+
+		for (int i = 900; i <= ecg.data.size(); i += 900)
+		{
+			vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+			out << data[0];
+			for (int j = 1; j < data.size(); j++)
+			{
+				out << " " << data[j];
+			}
+			out << "\n";
+			out2 << "2\n";
+		}
+	}
+
+	for (auto it : listNo)
+	{
+		cout << it << " ~\n";
+		ECG ecg;
+
+		ecg.readFromFile("../../../Data/TXTFiltered/" + it + ".txt");
+
+		for (int i = 900; i <= ecg.data.size(); i += 900)
+		{
+			vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+			out << data[0];
+			for (int j = 1; j < data.size(); j++)
+			{
+				out << " " << data[j];
+			}
+			out << "\n";
+			out2 << "3\n";
+		}
+	}
+}
+
+void Solver::makeDataForMoisyClasification2()
+{
+	vector <pair<string, pair<int, int> > > info; // name, start, type
+	info.push_back({ "A00001" ,{1800, 1} });
+	info.push_back({ "A00002" ,{5400, 1} });
+	info.push_back({ "A00011" ,{2500, 1} });
+	info.push_back({ "A00032" ,{1500, 1} });
+	info.push_back({ "A00050" ,{700, 1} });
+
+	info.push_back({ "A02073" ,{700, 0} });
+	info.push_back({ "A02110" ,{700, 0} });
+	info.push_back({ "A02111" ,{1500, 0} });
+	info.push_back({ "A02122" ,{1500, 0} });
+	info.push_back({ "A02125" ,{1500, 0} });
+
+	ofstream out("../../../../NonGitData/NoisyClasification/dataManual.txt");
+	ofstream out2("../../../../NonGitData/NoisyClasification/typeManual.txt");
+	// structure: 900 numbers from ECG
+	// type of ECG (0 - not noisy, 1 - noisy)
+
+	for (auto it : info)
+	{
+		ECG ecg;
+
+		ecg.readFromFile("../../../Data/TXTFiltered/" + it.first + ".txt");
+
+		vector <double> data = vector<double>(ecg.data.begin() + it.second.first, ecg.data.begin() + it.second.first + 900);
+
+		out << data[0];
+		for (int j = 1; j < data.size(); j++)
+		{
+			out << " " << data[j];
+		}
+		out << "\n";
+		out2 << it.second.second << "\n";
+	}
+}
+
+void Solver::makeDataForMoisyClasification3()
+{
+	vector <string> listN, listA, listO, listNo;
+
+	for (auto it : ECG::reference)
+	{
+		if (it.second == 'N')
+		{
+			listN.push_back(it.first);
+		}
+		if (it.second == 'A')
+		{
+			listA.push_back(it.first);
+		}
+		if (it.second == 'O')
+		{
+			listO.push_back(it.first);
+		}
+		if (it.second == '~')
+		{
+			listNo.push_back(it.first);
+		}
+	}
+	
+	/*
+	ofstream out("../../../../NonGitData/NoisyClasification/dataAF_Normal.txt");
+	ofstream out2("../../../../NonGitData/NoisyClasification/typeAF_Normal.txt");
+	ofstream out3("../../../../NonGitData/NoisyClasification/namesAF_Normal.txt");
+	ofstream outV("../../../../NonGitData/NoisyClasification/dataValidationAF_Normal.txt");
+	ofstream out2V("../../../../NonGitData/NoisyClasification/typeValidationAF_Normal.txt");
+	ofstream out3V("../../../../NonGitData/NoisyClasification/nameValidationAF_Normal.txt");
+	// structure: 900 numbers from ECG
+	// type of ECG (0 - not noisy, 1 - noisy)
+	
+	random_shuffle(listN.begin(), listN.end());
+	random_shuffle(listA.begin(), listA.end());
+	random_shuffle(listO.begin(), listO.end());
+	random_shuffle(listNo.begin(), listNo.end());
+	*/
+
+	cout << listN.size() << " " << listA.size() << " " << listO.size() << " " << listNo.size() << "\n\n";
+	
+	/*
+	//listN.resize(400);
+	//listA.resize(200);
+	//listO.resize(200);
+
+	int cntN = 0;
+	for (auto it : listN)
+	{
+		if (cntN > 840 + 600)
+		{
+			continue;
+		}
+
+		cout << it << " N\n";
+		ECG ecg;
+
+		ecg.readFromFile("../../../Data/TXTFiltered/" + it + ".txt");
+
+		if (cntN < 840)
+		{
+			for (int i = 900; i <= ecg.data.size(); i += 900)
+			{
+				out3 << it << "\n";
+
+				vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+				out << data[0];
+				for (int j = 1; j < data.size(); j++)
+				{
+					out << " " << data[j];
+				}
+				out << "\n";
+				out2 << "0\n";
+			}
+		}
+		else if (cntN < 840 + 600)
+		{
+			for (int i = 900; i <= ecg.data.size(); i += 900)
+			{
+				out3V << it << "\n";
+
+				vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+				outV << data[0];
+				for (int j = 1; j < data.size(); j++)
+				{
+					outV << " " << data[j];
+				}
+				outV << "\n";
+				out2V << "0\n";
+			}
+		}
+
+		cntN++;
+	}
+
+	int cntA = 0;
+	for (auto it : listA)
+	{
+		if (cntA > 420 + 300)
+		{
+			continue;
+		}
+
+		cout << it << " A\n";
+		ECG ecg;
+
+		ecg.readFromFile("../../../Data/TXTFiltered/" + it + ".txt");
+
+		if (cntA < 420)
+		{
+			for (int i = 900; i <= ecg.data.size(); i += 900)
+			{
+				out3 << it << "\n";
+
+				vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+				out << data[0];
+				for (int j = 1; j < data.size(); j++)
+				{
+					out << " " << data[j];
+				}
+				out << "\n";
+				out2 << "1\n";
+			}
+		}
+		else if(cntA < 420 + 300)
+		{
+			for (int i = 900; i <= ecg.data.size(); i += 900)
+			{
+				out3V << it << "\n";
+
+				vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+				outV << data[0];
+				for (int j = 1; j < data.size(); j++)
+				{
+					outV << " " << data[j];
+				}
+				outV << "\n";
+				out2V << "1\n";
+			}
+		}
+
+		cntA++;
+	}
+	*/
+
+	/*
+	for (auto it : listO)
+	{
+		cout << it << " O\n";
+		ECG ecg;
+
+		ecg.readFromFile("../../../Data/TXT/" + it + ".txt");
+
+		for (int i = 1300; i <= ecg.data.size(); i += 900)
+		{
+			vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+			out << data[0];
+			for (int j = 1; j < data.size(); j++)
+			{
+				out << " " << data[j];
+			}
+			out << "\n";
+			out2 << "0\n";
+		}
+
+		for (int i = 900; i <= ecg.data.size(); i += 900)
+		{
+			vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+			outV << data[0];
+			for (int j = 1; j < data.size(); j++)
+			{
+				outV << " " << data[j];
+			}
+			outV << "\n";
+			out2V << "0\n";
+		}
+	}
+	*/
+
+	/*
+	for (auto it : listNo)
+	{
+		cout << it << " ~\n";
+		ECG ecg;
+
+		ecg.readFromFile("../../../Data/TXT/" + it + ".txt");
+
+		for (int i = 1300; i <= ecg.data.size(); i += 900)
+		{
+			vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+			out << data[0];
+			for (int j = 1; j < data.size(); j++)
+			{
+				out << " " << data[j];
+			}
+			out << "\n";
+			out2 << "1\n";
+		}
+
+		for (int i = 900; i <= ecg.data.size(); i += 900)
+		{
+			vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+			outV << data[0];
+			for (int j = 1; j < data.size(); j++)
+			{
+				outV << " " << data[j];
+			}
+			outV << "\n";
+			out2V << "1\n";
+		}
+	}
+	*/
+}
+
+void Solver::makeDataForNoisyModel()
+{
+	ofstream out("../../../../NonGitData/NoisyClasification/dataUnfilteredForTrainedModel.txt");
+	ofstream outName("../../../../NonGitData/NoisyClasification/nameUnfilteredForTrainedModel.txt");
+
+	for (auto it : ECG::reference)
+	{
+		cout << it.first << " " << it.second << "\n";
+		ECG ecg;
+
+		ecg.readFromFile("../../../Data/TXT/" + it.first + ".txt");
+
+		for (int i = 900; i <= ecg.data.size(); i += 900)
+		{
+			vector <double> data = vector<double>(ecg.data.begin() + (i - 900), ecg.data.begin() + i);
+
+			out << data[0];
+			for (int j = 1; j < data.size(); j++)
+			{
+				out << " " << data[j];
+			}
+			out << "\n";
+			outName << it.first << "\n";
+		}
+	}
+}
+
+void Solver::makeDataAFvsNormalScaled()
+{
+	vector <string> listN, listA, listO, listNo;
+
+	for (auto it : ECG::reference)
+	{
+		if (it.second == 'N')
+		{
+			listN.push_back(it.first);
+		}
+		if (it.second == 'A')
+		{
+			listA.push_back(it.first);
+		}
+		if (it.second == 'O')
+		{
+			listO.push_back(it.first);
+		}
+		if (it.second == '~')
+		{
+			listNo.push_back(it.first);
+		}
+	}
+
+	ofstream out("../../../../NonGitData/NoisyClasification/dataAF_NormalScaled.txt");
+	ofstream out2("../../../../NonGitData/NoisyClasification/typeAF_NormalScaled.txt");
+	ofstream out3("../../../../NonGitData/NoisyClasification/namesAF_NormalScaled.txt");
+	ofstream outV("../../../../NonGitData/NoisyClasification/dataValidationAF_NormalScaled.txt");
+	ofstream out2V("../../../../NonGitData/NoisyClasification/typeValidationAF_NormalScaled.txt");
+	ofstream out3V("../../../../NonGitData/NoisyClasification/nameValidationAF_NormalScaled.txt");
+	// structure: 900 numbers from ECG
+	// type of ECG (0 - mormal, 1 - AF)
+
+	random_shuffle(listN.begin(), listN.end());
+	random_shuffle(listA.begin(), listA.end());
+	random_shuffle(listO.begin(), listO.end());
+	random_shuffle(listNo.begin(), listNo.end());
+
+	cout << listN.size() << " " << listA.size() << " " << listO.size() << " " << listNo.size() << "\n\n";
+
+	//listN.resize(400);
+	//listA.resize(200);
+	//listO.resize(200);
+
+	int cntN = 0;
+	for (auto it : listN)
+	{
+		if (cntN > 840 + 600)
+		{
+			continue;
+		}
+
+		cout << it << " N\n";
+		ECG ecg;
+
+		if (cntN < 840)
+		{
+			ecg.readFromFile("../../../Data/TXTFiltered/" + it + ".txt");
+			vector <int> rPeaks = ecg.getRPeaks(0, ecg.data.size());
+
+			for (int i = 4; i < rPeaks.size(); i += 4)
+			{
+				vector <double> data;
+				for (int j = rPeaks[i - 4]; j < rPeaks[i]; j++)
+				{
+					data.push_back(ecg.data[j]);
+				}
+
+				vector <double> scaledData = ECG::rescale(data, 900);
+
+				out3 << it << "\n";
+
+				out << scaledData[0];
+				for (int j = 1; j < scaledData.size(); j++)
+				{
+					out << " " << scaledData[j];
+				}
+				out << "\n";
+				out2 << "0\n";
+			}
+		}
+		else if (cntN < 840 + 600)
+		{
+			ecg.readFromFile("../../../Data/TXTFiltered/" + it + ".txt");
+			vector <int> rPeaks = ecg.getRPeaks(0, ecg.data.size());
+
+			for (int i = 4; i < rPeaks.size(); i += 4)
+			{
+				vector <double> data;
+				for (int j = rPeaks[i - 4]; j < rPeaks[i]; j++)
+				{
+					data.push_back(ecg.data[j]);
+				}
+
+				vector <double> scaledData = ECG::rescale(data, 900);
+
+				out3V << it << "\n";
+
+				outV << scaledData[0];
+				for (int j = 1; j < scaledData.size(); j++)
+				{
+					outV << " " << scaledData[j];
+				}
+				outV << "\n";
+				out2V << "0\n";
+			}
+		}
+
+		cntN++;
+	}
+
+	int cntA = 0;
+	for (auto it : listA)
+	{
+		if (cntA > 420 + 300)
+		{
+			continue;
+		}
+
+		cout << it << " A\n";
+		ECG ecg;
+
+		ecg.readFromFile("../../../Data/TXTFiltered/" + it + ".txt");
+
+		if (cntA < 420)
+		{
+			ecg.readFromFile("../../../Data/TXTFiltered/" + it + ".txt");
+			vector <int> rPeaks = ecg.getRPeaks(0, ecg.data.size());
+
+			for (int i = 4; i < rPeaks.size(); i += 4)
+			{
+				vector <double> data;
+				for (int j = rPeaks[i - 4]; j < rPeaks[i]; j++)
+				{
+					data.push_back(ecg.data[j]);
+				}
+
+				vector <double> scaledData = ECG::rescale(data, 900);
+
+				out3 << it << "\n";
+
+				out << scaledData[0];
+				for (int j = 1; j < scaledData.size(); j++)
+				{
+					out << " " << scaledData[j];
+				}
+				out << "\n";
+				out2 << "1\n";
+			}
+		}
+		else if (cntA < 420 + 300)
+		{
+			ecg.readFromFile("../../../Data/TXTFiltered/" + it + ".txt");
+			vector <int> rPeaks = ecg.getRPeaks(0, ecg.data.size());
+
+			for (int i = 4; i < rPeaks.size(); i += 4)
+			{
+				vector <double> data;
+				for (int j = rPeaks[i - 4]; j < rPeaks[i]; j++)
+				{
+					data.push_back(ecg.data[j]);
+				}
+
+				vector <double> scaledData = ECG::rescale(data, 900);
+
+				out3V << it << "\n";
+
+				outV << scaledData[0];
+				for (int j = 1; j < scaledData.size(); j++)
+				{
+					outV << " " << scaledData[j];
+				}
+				outV << "\n";
+				out2V << "1\n";
+			}
+		}
+
+		cntA++;
+	}
+}
+
+void Solver::combineNoisyPrediction()
+{
+	ifstream inPrediction("../../../../NonGitData/NoisyClasification/NNOutput/UnFilteredNoisePrediction.txt");
+	ifstream inName("../../../../NonGitData/NoisyClasification/NNOutput/nameUnfilteredForTrainedModel.txt");
+
+	map<string, vector <int> > predictions;
+	string s;
+	double a;
+
+	while (inPrediction >> a)
+	{
+		inName >> s;
+		a += 0.5;
+
+		predictions[s].push_back(int(a));
+	}
+
+	int nn = 0, np = 0, pn = 0, pp = 0;
+
+	ifstream inRECORDS("../../../Data/RECORDS.txt");
+	string name;
+
+	ofstream outNonNoisy("../../../../NonGitData/NormalClasification/RECORDSAfterNoisy");
+
+	while (inRECORDS >> name)
+	{
+		char type = ECG::reference[name];
+
+		int cntNoisy = 0;
+
+		for (auto itt : predictions[name])
+		{
+			if (itt == 1)
+			{
+				cntNoisy++;
+			}
+		}
+
+		//if(cntNoisy > 0)
+		if (cntNoisy > predictions[name].size() / 2.0) // if we predict as noisy
+		{
+			if (type == '~')
+			{
+				pp++;
+			}
+			else
+			{
+				np++;
+			}
+		}
+		else
+		{
+			if (type == '~')
+			{
+				pn++;
+			}
+			else
+			{
+				nn++;
+			}
+
+			outNonNoisy << name << "\n";
+		}
+	}
+
+	cout << "ref = normal  predict = normal: " << nn << "\n";
+	cout << "ref = normal  predict = noisy: " << np << "\n";
+	cout << "ref = noisy  predict = normal: " << pn << "\n";
+	cout << "ref = noisy  predict = noisy: " << pp << "\n";
+
+	double F_1p = 2.0 * double(pp) / (double(np) + double(pn) + 2.0 * double(pp));
+	cout << "F_1p = " << F_1p << "\n";
 }
