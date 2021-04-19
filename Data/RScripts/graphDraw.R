@@ -4,7 +4,7 @@ types <-read.table("REFERENCE.txt")
 typ<-types[num,]
 print(typ)
 if(typ$V2 == type){
-  graph<-read.table(paste('TXTFiltered/',x, sep=""))
+  graph<-read.table(paste('TXT/',x, sep=""))
   peaks<-read.table(paste('RPeaks/',x, sep=""))
   j=1
   for(i in 0:2){
