@@ -36,5 +36,5 @@ public:
 	void addVerticalLine(double pos, Color c = Color::Red);
 	void clear();
 
-	void show(int windowX = 1800, int windowY = 900);
+	void show(int windowX = 1800, int windowY = 600);
 };

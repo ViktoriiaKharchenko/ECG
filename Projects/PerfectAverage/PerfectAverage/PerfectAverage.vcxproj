@@ -142,6 +142,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GPoint.cpp" />
     <ClCompile Include="Solver.cpp" />
+    <ClCompile Include="SolverForNN.cpp" />
     <ClCompile Include="TasksQueue.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +152,7 @@
     <ClInclude Include="GLine.h" />
     <ClInclude Include="GPoint.h" />
     <ClInclude Include="Solver.h" />
+    <ClInclude Include="SolverForNN.h" />
     <ClInclude Include="TasksQueue.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
