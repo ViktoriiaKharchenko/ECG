@@ -49,5 +49,8 @@ int main()
 
 	//s2.makeDataForNvsAFvsO();
 
+	//s2.test();
+	s2.test2();
+
 	return 0;
 }
