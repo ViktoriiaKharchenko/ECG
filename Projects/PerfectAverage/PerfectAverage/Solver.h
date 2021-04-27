@@ -57,9 +57,9 @@ public:
 	void analyzeComputedStats3();
 
 
-	void makeDataForMoisyClasification();
-	void makeDataForMoisyClasification2();
-	void makeDataForMoisyClasification3();
+	void makeDataForNoisyClasification();
+	void makeDataForNoisyClasification2();
+	void makeDataForNoisyClasification3();
 	void makeDataForNoisyModel();
 
 	void makeDataAFvsNormalScaled();

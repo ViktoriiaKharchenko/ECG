@@ -1219,7 +1219,7 @@ void Solver::analyzeComputedStats3()
 	}
 }
 
-void Solver::makeDataForMoisyClasification()
+void Solver::makeDataForNoisyClasification()
 {
 	vector <string> listN, listA, listO, listNo;
 
@@ -1344,7 +1344,7 @@ void Solver::makeDataForMoisyClasification()
 	}
 }
 
-void Solver::makeDataForMoisyClasification2()
+void Solver::makeDataForNoisyClasification2()
 {
 	vector <pair<string, pair<int, int> > > info; // name, start, type
 	info.push_back({ "A00001" ,{1800, 1} });
@@ -1382,7 +1382,7 @@ void Solver::makeDataForMoisyClasification2()
 	}
 }
 
-void Solver::makeDataForMoisyClasification3()
+void Solver::makeDataForNoisyClasification3()
 {
 	vector <string> listN, listA, listO, listNo;
 

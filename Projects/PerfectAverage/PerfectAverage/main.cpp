@@ -49,8 +49,13 @@ int main()
 
 	//s2.makeDataForNvsAFvsO();
 
-	//s2.test();
-	s2.test2();
+	//s2.test1_1();
+	//s2.test1_2();
+	//s2.test2();
+
+	//s2.p_test1_1();
+	//s2.p_test1_2();
+	s2.p_test2();
 
 	return 0;
 }

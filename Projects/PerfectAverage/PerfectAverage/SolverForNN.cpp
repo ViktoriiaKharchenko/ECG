@@ -1444,6 +1444,39 @@ int SolverForNN::classify2_N_vs_O(vector <double>& types)
 	}
 }
 
+int SolverForNN::classify1_N_vs_AF_vs_O(vector <double>& types)
+{
+	double cnt[3] = {0, 0, 0};
+
+	for (auto it : types)
+	{
+		cnt[int(it + 0.5)] += 1.0;
+	}
+
+	if (cnt[1] >= cnt[0])
+	{
+		if (cnt[1] >= cnt[2] * 1.6)
+		{
+			return 1;
+		}
+		else
+		{
+			return 2;
+		}
+	}
+	else
+	{
+		if (cnt[0] > cnt[2] * 1.9)
+		{
+			return 0;
+		}
+		else
+		{
+			return 2;
+		}
+	}
+}
+
 vector <vector <int> > SolverForNN::tree1()
 {
 	// ((N vs AF) vs O) vs noisy
@@ -1717,12 +1750,84 @@ vector <vector <int> > SolverForNN::tree3()
 	return res;
 }
 
-void SolverForNN::test()
+vector <vector <int> > SolverForNN::tree4()
+{
+	// (N vs AF vs O) vs noisy
+
+	map <string, vector <double> > infNonNoi_vs_Noi;
+	map <string, vector <double> > infN_vs_N_vs_O;
+
+	{
+		string name;
+		double type, type1;
+
+		ifstream inType0("../../../../NonGitData/NormalClasification/ClassificationResults/0_UnfilteredNoisePrediction.txt");
+		ifstream inName0("../../../../NonGitData/NormalClasification/ClassificationResults/0_nameUnfilteredForTrainedModel.txt");
+
+		while (inName0 >> name)
+		{
+			inType0 >> type;
+
+			infNonNoi_vs_Noi[name].push_back(type);
+		}
+
+		ifstream inType1("../../../../NonGitData/NormalClasification/ClassificationResults/1_N_vs_AF_vs_O_model.txt");
+		ifstream inName1_2("../../../../NonGitData/NormalClasification/ClassificationResults/1_2_nameScaledForTrainedModel.txt");
+
+		while (inName1_2 >> name)
+		{
+			inType1 >> type1;
+
+			infN_vs_N_vs_O[name].push_back(type1);
+		}
+	}
+
+	vector <vector <int> > res(4, vector <int>(4, 0));
+
+	for (auto it : ECG::reference)
+	{
+		int realType, myType;
+		if (it.second == 'N')
+		{
+			realType = 0;
+		}
+		else if (it.second == 'A')
+		{
+			realType = 1;
+		}
+		else if (it.second == 'O')
+		{
+			realType = 2;
+		}
+		else
+		{
+			realType = 3;
+		}
+
+		int class0 = classify0_unfiltered(infNonNoi_vs_Noi[it.first]);
+		int class1 = classify1_N_vs_AF_vs_O(infN_vs_N_vs_O[it.first]);
+
+		if (class0 == 1)
+		{
+			myType = 3;
+		}
+		else
+		{
+			myType = class1;
+		}
+
+		res[realType][myType]++;
+	}
+
+	return res;
+}
+
+void SolverForNN::test1_1()
 {
 	map<string, vector <double> > inf;
 
 	{
-		ifstream inType("../../../../NonGitData/NormalClasification/ClassificationResults/2_AF_vs_O_model2.txt");
+		ifstream inType("../../../../NonGitData/NormalClasification/ClassificationResults/1_NO_vs_AF_model2.txt");
 		ifstream inName("../../../../NonGitData/NormalClasification/ClassificationResults/1_2_nameScaledForTrainedModel.txt");
 
 		string name;
@@ -1740,13 +1845,15 @@ void SolverForNN::test()
 
 	for (auto& it : inf)
 	{
-		if (ECG::reference[it.first] == '~' || ECG::reference[it.first] == 'N')
+		//*
+		if (ECG::reference[it.first] == '~')
 		{
 			continue;
 		}
+		//*/
 
-		int f = classify2_AF_vs_O(it.second);
-		int ff = ECG::reference[it.first] == 'O';
+		int f = classify1_NO_vs_AF(it.second);
+		int ff = ECG::reference[it.first] == 'A';
 
 		res[ff][f]++;
 	}
@@ -1760,6 +1867,67 @@ void SolverForNN::test()
 
 	cout << "f1_0 = " << f1_0 << "\n";
 	cout << "f1_1 = " << f1_1 << "\n";
+	cout << "f1 = " << f1 << "\n";
+}
+
+void SolverForNN::test1_2()
+{
+	map<string, vector <double> > inf;
+
+	{
+		ifstream inType("../../../../NonGitData/NormalClasification/ClassificationResults/1_N_vs_AF_vs_O_model.txt");
+		ifstream inName("../../../../NonGitData/NormalClasification/ClassificationResults/1_2_nameScaledForTrainedModel.txt");
+
+		string name;
+		double type;
+
+		while (inName >> name)
+		{
+			inType >> type;
+
+			inf[name].push_back(type);
+		}
+	}
+
+	int res[3][3] = { {0, 0, 0}, {0, 0, 0}, {0, 0, 0} };
+
+	for (auto& it : inf)
+	{
+		if (ECG::reference[it.first] == '~')
+		{
+			continue;
+		}
+
+		int f = classify1_N_vs_AF_vs_O(it.second);
+		int ff;
+		if (ECG::reference[it.first] == 'N')
+		{
+			ff = 0;
+		}
+		else if (ECG::reference[it.first] == 'A')
+		{
+			ff = 1;
+		}
+		else
+		{
+			ff = 2;
+		}
+
+		res[ff][f]++;
+	}
+
+	cout << res[0][0] << "\t" << res[0][1] << "\t" << res[0][2] << "\n";
+	cout << res[1][0] << "\t" << res[1][1] << "\t" << res[1][2] << "\n";
+	cout << res[2][0] << "\t" << res[2][1] << "\t" << res[2][2] << "\n";
+
+	double f1_N = (2.0 * res[0][0]) / (2.0 * res[0][0] + res[1][0] + res[2][0] + res[0][1] + res[0][2]);
+	double f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[0][1] + res[2][1]);
+	double f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[0][2] + res[1][2]);
+	double f1 = (f1_N + f1_A + f1_O) / 3.0;
+
+	cout << "f1_N = " << f1_N << "\n";
+	cout << "f1_A = " << f1_A << "\n";
+	cout << "f1_O = " << f1_O << "\n";
 	cout << "f1 = " << f1 << "\n";
 }
 
@@ -1809,6 +1977,808 @@ void SolverForNN::test2()
 	
 	res = tree3();
 	cout << "((AF vs O) vs N) vs noisy\n";
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			cout << res[i][j] << "\t";
+		}
+		cout << "\n";
+	}
+	f1_N = (2.0 * res[0][0]) / (2.0 * res[0][0] + res[0][1] + res[0][2] + res[0][3] + res[1][0] + res[2][0] + res[3][0]);
+	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
+	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
+	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
+	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
+	cout << "F1 = " << f1 << "\n\n\n";
+
+
+	res = tree4();
+	cout << "(N vs AF vs O) vs noisy\n";
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			cout << res[i][j] << "\t";
+		}
+		cout << "\n";
+	}
+	f1_N = (2.0 * res[0][0]) / (2.0 * res[0][0] + res[0][1] + res[0][2] + res[0][3] + res[1][0] + res[2][0] + res[3][0]);
+	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
+	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
+	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
+	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
+	cout << "F1 = " << f1 << "\n\n\n";
+}
+
+pair<double, double> SolverForNN::split2(string s)
+{
+	int split;
+	string s1, s2;
+
+	for (int i = 0; i < s.size(); i++)
+	{
+		if (s[i] == ',')
+		{
+			split = i;
+		}
+	}
+
+	s1 = s.substr(0, split);
+	s2 = s.substr(split + 1, s.size() - split - 1);
+
+	istringstream os1(s1);
+	double v1;
+	os1 >> v1;
+
+	istringstream os2(s2);
+	double v2;
+	os2 >> v2;
+
+	return { v1, v2 };
+}
+
+pair<pair<double, double>, double> SolverForNN::split3(string s)
+{
+	vector <int> split;
+	string s1, s2, s3;
+
+	for (int i = 0; i < s.size(); i++)
+	{
+		if (s[i] == ',')
+		{
+			split.push_back(i);
+		}
+	}
+
+	s1 = s.substr(0, split[0]);
+	s2 = s.substr(split[0] + 1, split[1] - split[0] - 1);
+	s3 = s.substr(split[1] + 1, s.size() - split[1] - 1);
+
+	istringstream os1(s1);
+	double v1;
+	os1 >> v1;
+
+	istringstream os2(s2);
+	double v2;
+	os2 >> v2;
+
+	istringstream os3(s3);
+	double v3;
+	os3 >> v3;
+
+	return { {v1, v2}, v3 };
+}
+
+int SolverForNN::p_classify0_filtered(vector <pair<double, double> >& types)
+{
+	double prb0 = 1.0, prb1 = 1.0;
+
+	for (auto it : types)
+	{
+		prb0 *= it.first;
+		prb1 *= it.second;
+	}
+
+	if (prb1 * pow(0.7, types.size()) > prb0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int SolverForNN::p_classify0_unfiltered(vector <pair<double, double>>& types)
+{
+	double prb0 = 1.0, prb1 = 1.0;
+
+	for (auto it : types)
+	{
+		prb0 *= it.first;
+		prb1 *= it.second;
+	}
+
+	if (prb1 * pow(1.4, types.size()) > prb0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int SolverForNN::p_classify1_AFO_vs_N(vector <pair<double, double>>& types)
+{
+	double prb0 = 1.0, prb1 = 1.0;
+
+	for (auto it : types)
+	{
+		prb0 *=	it.first;
+		prb1 *= it.second;
+	}
+
+	if (prb1 > prb0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int SolverForNN::p_classify1_NAF_vs_O(vector <pair<double, double>>& types)
+{
+	double sum0 = 0.0, sum1 = 0.0;
+
+	for (auto it : types)
+	{
+		sum0 += (it.first > it.second);
+		sum1 += (it.second > it.first);
+	}
+
+	if (sum1 > types.size() * 0.2)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int SolverForNN::p_classify1_NO_vs_AF(vector <pair<double, double>>& types)
+{
+	double prb0 = 1.0, prb1 = 1.0;
+
+	for (auto it : types)
+	{
+		prb0 *= it.first;
+		prb1 *= it.second;
+	}
+
+	if (prb1 * pow(0.6, types.size()) > prb0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int SolverForNN::p_classify2_AF_vs_O(vector <pair<double, double>>& types)
+{
+	double prb0 = 1.0, prb1 = 1.0;
+
+	for (auto it : types)
+	{
+		prb0 *= it.first;
+		prb1 *= it.second;
+	}
+
+	if (prb1 > prb0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int SolverForNN::p_classify2_N_vs_AF(vector <pair<double, double>>& types)
+{
+	double prb0 = 1.0, prb1 = 1.0;
+
+	for (auto it : types)
+	{
+		prb0 *= it.first;
+		prb1 *= it.second;
+	}
+
+	if (prb1 > prb0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int SolverForNN::p_classify2_N_vs_O(vector <pair<double, double>>& types)
+{
+	double prb0 = 1.0, prb1 = 1.0;
+
+	for (auto it : types)
+	{
+		prb0 *= it.first;
+		prb1 *= it.second;
+	}
+
+	if (prb1 > prb0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int SolverForNN::p_classify1_N_vs_AF_vs_O(vector <pair<pair<double, double>, double> >& types)
+{
+	double prb0 = 1.0, prb1 = 1.0, prb2 = 1.0;
+
+	for (auto it : types)
+	{
+		prb0 *= it.first.first;
+		prb1 *= it.first.second;
+		prb2 *= it.second;
+	}
+
+	if (prb0 > prb1 && prb0 > prb2 * pow(1.15, types.size()))
+	{
+		return 0;
+	}
+	else
+	{
+		if (prb1 > prb2 * pow(1.2, types.size()))
+		{
+			return 1;
+		}
+		else
+		{
+			return 2;
+		}
+	}
+}
+
+void SolverForNN::p_test1_1()
+{
+	map<string, vector <pair<double, double> > > inf;
+
+	{
+		ifstream inType("../../../../NonGitData/NormalClasification/ClassifResProb/0_noise_unfiltered_probability_model.txt");
+		ifstream inName("../../../../NonGitData/NormalClasification/ClassifResProb/0_nameUnfilteredForTrainedModel.txt");
+
+		string name;
+		string type;
+
+		while (inName >> name)
+		{
+			inType >> type;
+
+			inf[name].push_back(split2(type));
+		}
+	}
+
+	int res[2][2] = { {0, 0}, {0, 0} };
+
+	for (auto& it : inf)
+	{
+		/*
+		if (ECG::reference[it.first] == '~')
+		{
+			continue;
+		}
+		//*/
+
+		int f = p_classify0_unfiltered(it.second);
+		int ff = ECG::reference[it.first] == '~';
+
+		res[ff][f]++;
+	}
+
+	cout << res[0][0] << " " << res[0][1] << "\n";
+	cout << res[1][0] << " " << res[1][1] << "\n";
+
+	double f1_0 = (2.0 * res[0][0]) / (2.0 * res[0][0] + res[1][0] + res[0][1]);
+	double f1_1 = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[0][1]);
+	double f1 = (f1_0 + f1_1) / 2.0;
+
+	cout << "f1_0 = " << f1_0 << "\n";
+	cout << "f1_1 = " << f1_1 << "\n";
+	cout << "f1 = " << f1 << "\n";
+}
+
+void SolverForNN::p_test1_2()
+{
+	map<string, vector <pair<pair<double, double>, double> > > inf;
+
+	{
+		ifstream inType("../../../../NonGitData/NormalClasification/ClassifResProb/12_N_vs_AF_vs_O_probability_model.txt");
+		ifstream inName("../../../../NonGitData/NormalClasification/ClassifResProb/1_2_nameScaledForTrainedModel.txt");
+
+		string name;
+		string type;
+
+		while (inName >> name)
+		{
+			inType >> type;
+
+			inf[name].push_back(split3(type));
+		}
+	}
+
+	int res[3][3] = { {0, 0, 0}, {0, 0, 0}, {0, 0, 0} };
+
+	for (auto& it : inf)
+	{
+		if (ECG::reference[it.first] == '~')
+		{
+			continue;
+		}
+
+		int f = p_classify1_N_vs_AF_vs_O(it.second);
+		int ff;
+		if (ECG::reference[it.first] == 'N')
+		{
+			ff = 0;
+		}
+		else if (ECG::reference[it.first] == 'A')
+		{
+			ff = 1;
+		}
+		else
+		{
+			ff = 2;
+		}
+
+		res[ff][f]++;
+	}
+
+	cout << res[0][0] << "\t" << res[0][1] << "\t" << res[0][2] << "\n";
+	cout << res[1][0] << "\t" << res[1][1] << "\t" << res[1][2] << "\n";
+	cout << res[2][0] << "\t" << res[2][1] << "\t" << res[2][2] << "\n";
+
+	double f1_N = (2.0 * res[0][0]) / (2.0 * res[0][0] + res[1][0] + res[2][0] + res[0][1] + res[0][2]);
+	double f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[0][1] + res[2][1]);
+	double f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[0][2] + res[1][2]);
+	double f1 = (f1_N + f1_A + f1_O) / 3.0;
+
+	cout << "f1_N = " << f1_N << "\n";
+	cout << "f1_A = " << f1_A << "\n";
+	cout << "f1_O = " << f1_O << "\n";
+	cout << "f1 = " << f1 << "\n";
+}
+
+vector <vector <int> > SolverForNN::p_tree1()
+{
+	// ((N vs AF) vs O) vs noisy
+
+	map <string, vector <pair<double, double> > > infNonNoi_vs_Noi;
+	map <string, vector <pair<double, double> > > infNAF_vs_O;
+	map <string, vector <pair<double, double> > > infN_vs_AF;
+
+	{
+		string name;
+		string type, type1, type2;
+
+		ifstream inType0("../../../../NonGitData/NormalClasification/ClassifResProb/0_noise_unfiltered_probability_model.txt");
+		ifstream inName0("../../../../NonGitData/NormalClasification/ClassifResProb/0_nameUnfilteredForTrainedModel.txt");
+
+		while (inName0 >> name)
+		{
+			inType0 >> type;
+
+			infNonNoi_vs_Noi[name].push_back(split2(type));
+		}
+
+		ifstream inType1("../../../../NonGitData/NormalClasification/ClassifResProb/1_NAF_vs_O_probability_model.txt");
+		ifstream inType2("../../../../NonGitData/NormalClasification/ClassifResProb/2_N_vs_AF_probability_model.txt");
+		ifstream inName1_2("../../../../NonGitData/NormalClasification/ClassifResProb/1_2_nameScaledForTrainedModel.txt");
+
+		while (inName1_2 >> name)
+		{
+			inType1 >> type1;
+			inType2 >> type2;
+
+			infNAF_vs_O[name].push_back(split2(type1));
+			infN_vs_AF[name].push_back(split2(type2));
+		}
+	}
+
+	vector <vector <int> > res(4, vector <int>(4, 0));
+
+	for (auto it : ECG::reference)
+	{
+		int realType, myType;
+		if (it.second == 'N')
+		{
+			realType = 0;
+		}
+		else if (it.second == 'A')
+		{
+			realType = 1;
+		}
+		else if (it.second == 'O')
+		{
+			realType = 2;
+		}
+		else
+		{
+			realType = 3;
+		}
+
+		int class0 = p_classify0_unfiltered(infNonNoi_vs_Noi[it.first]);
+		int class1 = p_classify1_NAF_vs_O(infNAF_vs_O[it.first]);
+		int class2 = p_classify2_N_vs_AF(infN_vs_AF[it.first]);
+
+		if (class0 == 1)
+		{
+			myType = 3;
+		}
+		else
+		{
+			if (class1 == 1)
+			{
+				myType = 2;
+			}
+			else
+			{
+				if (class2 == 1)
+				{
+					myType = 1;
+				}
+				else
+				{
+					myType = 0;
+				}
+			}
+		}
+
+		res[realType][myType]++;
+	}
+
+	return res;
+}
+
+vector <vector <int> > SolverForNN::p_tree2()
+{
+	// ((N vs O) vs AF) vs noisy
+
+	map <string, vector <pair<double, double> > > infNonNoi_vs_Noi;
+	map <string, vector <pair<double, double> > > infNO_vs_AF;
+	map <string, vector <pair<double, double> > > infN_vs_O;
+
+	{
+		string name;
+		string type, type1, type2;
+
+		ifstream inType0("../../../../NonGitData/NormalClasification/ClassifResProb/0_noise_unfiltered_probability_model.txt");
+		ifstream inName0("../../../../NonGitData/NormalClasification/ClassifResProb/0_nameUnfilteredForTrainedModel.txt");
+
+		while (inName0 >> name)
+		{
+			inType0 >> type;
+
+			infNonNoi_vs_Noi[name].push_back(split2(type));
+		}
+
+		ifstream inType1("../../../../NonGitData/NormalClasification/ClassifResProb/1_NO_vs_AF_probability_model.txt");
+		ifstream inType2("../../../../NonGitData/NormalClasification/ClassifResProb/2_N_vs_O_probability_model.txt");
+		ifstream inName1_2("../../../../NonGitData/NormalClasification/ClassifResProb/1_2_nameScaledForTrainedModel.txt");
+
+		while (inName1_2 >> name)
+		{
+			inType1 >> type1;
+			inType2 >> type2;
+
+			infNO_vs_AF[name].push_back(split2(type1));
+			infN_vs_O[name].push_back(split2(type2));
+		}
+	}
+
+	vector <vector <int> > res(4, vector <int>(4, 0));
+
+	for (auto it : ECG::reference)
+	{
+		int realType, myType;
+		if (it.second == 'N')
+		{
+			realType = 0;
+		}
+		else if (it.second == 'A')
+		{
+			realType = 1;
+		}
+		else if (it.second == 'O')
+		{
+			realType = 2;
+		}
+		else
+		{
+			realType = 3;
+		}
+
+		int class0 = p_classify0_unfiltered(infNonNoi_vs_Noi[it.first]);
+		int class1 = p_classify1_NO_vs_AF(infNO_vs_AF[it.first]);
+		int class2 = p_classify2_N_vs_O(infN_vs_O[it.first]);
+
+		if (class0 == 1)
+		{
+			myType = 3;
+		}
+		else
+		{
+			if (class1 == 1)
+			{
+				myType = 1;
+			}
+			else
+			{
+				if (class2 == 1)
+				{
+					myType = 2;
+				}
+				else
+				{
+					myType = 0;
+				}
+			}
+		}
+
+		res[realType][myType]++;
+	}
+
+	return res;
+}
+
+vector <vector <int> > SolverForNN::p_tree3()
+{
+	// ((AF vs O) vs N) vs noisy
+
+	map <string, vector <pair<double, double> > > infNonNoi_vs_Noi;
+	map <string, vector <pair<double, double> > > infAFO_vs_N;
+	map <string, vector <pair<double, double> > > infAF_vs_O;
+
+	{
+		string name;
+		string type, type1, type2;
+
+		ifstream inType0("../../../../NonGitData/NormalClasification/ClassifResProb/0_noise_unfiltered_probability_model.txt");
+		ifstream inName0("../../../../NonGitData/NormalClasification/ClassifResProb/0_nameUnfilteredForTrainedModel.txt");
+
+		while (inName0 >> name)
+		{
+			inType0 >> type;
+
+			infNonNoi_vs_Noi[name].push_back(split2(type));
+		}
+
+		ifstream inType1("../../../../NonGitData/NormalClasification/ClassifResProb/1_AFO_vs_N_probability_model.txt");
+		ifstream inType2("../../../../NonGitData/NormalClasification/ClassifResProb/2_AF_vs_O_probability_model.txt");
+		ifstream inName1_2("../../../../NonGitData/NormalClasification/ClassifResProb/1_2_nameScaledForTrainedModel.txt");
+
+		while (inName1_2 >> name)
+		{
+			inType1 >> type1;
+			inType2 >> type2;
+
+			infAFO_vs_N[name].push_back(split2(type1));
+			infAF_vs_O[name].push_back(split2(type2));
+		}
+	}
+
+	vector <vector <int> > res(4, vector <int>(4, 0));
+
+	for (auto it : ECG::reference)
+	{
+		int realType, myType;
+		if (it.second == 'N')
+		{
+			realType = 0;
+		}
+		else if (it.second == 'A')
+		{
+			realType = 1;
+		}
+		else if (it.second == 'O')
+		{
+			realType = 2;
+		}
+		else
+		{
+			realType = 3;
+		}
+
+		int class0 = p_classify0_unfiltered(infNonNoi_vs_Noi[it.first]);
+		int class1 = p_classify1_AFO_vs_N(infAFO_vs_N[it.first]);
+		int class2 = p_classify2_AF_vs_O(infAF_vs_O[it.first]);
+
+		if (class0 == 1)
+		{
+			myType = 3;
+		}
+		else
+		{
+			if (class1 == 1)
+			{
+				myType = 0;
+			}
+			else
+			{
+				if (class2 == 1)
+				{
+					myType = 2;
+				}
+				else
+				{
+					myType = 1;
+				}
+			}
+		}
+
+		res[realType][myType]++;
+	}
+
+	return res;
+}
+
+vector <vector <int> > SolverForNN::p_tree4()
+{
+	// (N vs AF vs O) vs noisy
+
+	map <string, vector <pair<double, double> > > infNonNoi_vs_Noi;
+	map <string, vector <pair<pair<double, double>, double> > > infN_vs_N_vs_O;
+
+	{
+		string name;
+		string type, type1;
+
+		ifstream inType0("../../../../NonGitData/NormalClasification/ClassifResProb/0_noise_unfiltered_probability_model.txt");
+		ifstream inName0("../../../../NonGitData/NormalClasification/ClassifResProb/0_nameUnfilteredForTrainedModel.txt");
+
+		while (inName0 >> name)
+		{
+			inType0 >> type;
+
+			infNonNoi_vs_Noi[name].push_back(split2(type));
+		}
+
+		ifstream inType1("../../../../NonGitData/NormalClasification/ClassifResProb/12_N_vs_AF_vs_O_probability_model.txt");
+		ifstream inName1_2("../../../../NonGitData/NormalClasification/ClassifResProb/1_2_nameScaledForTrainedModel.txt");
+
+		while (inName1_2 >> name)
+		{
+			inType1 >> type1;
+
+			infN_vs_N_vs_O[name].push_back(split3(type1));
+		}
+	}
+
+	vector <vector <int> > res(4, vector <int>(4, 0));
+
+	for (auto it : ECG::reference)
+	{
+		int realType, myType;
+		if (it.second == 'N')
+		{
+			realType = 0;
+		}
+		else if (it.second == 'A')
+		{
+			realType = 1;
+		}
+		else if (it.second == 'O')
+		{
+			realType = 2;
+		}
+		else
+		{
+			realType = 3;
+		}
+
+		int class0 = p_classify0_unfiltered(infNonNoi_vs_Noi[it.first]);
+		int class1 = p_classify1_N_vs_AF_vs_O(infN_vs_N_vs_O[it.first]);
+
+		if (class0 == 1)
+		{
+			myType = 3;
+		}
+		else
+		{
+			myType = class1;
+		}
+
+		res[realType][myType]++;
+	}
+
+	return res;
+}
+
+void SolverForNN::p_test2()
+{
+	vector <vector <int> > res;
+	double f1_N, f1_A, f1_O, f1_Noi;
+	double f1;
+
+	res = p_tree1();
+	cout << "((N vs AF) vs O) vs noisy\n";
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			cout << res[i][j] << "\t";
+		}
+		cout << "\n";
+	}
+	f1_N = (2.0 * res[0][0]) / (2.0 * res[0][0] + res[0][1] + res[0][2] + res[0][3] + res[1][0] + res[2][0] + res[3][0]);
+	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
+	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
+	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
+	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
+	cout << "F1 = " << f1 << "\n\n\n";
+
+
+	res = p_tree2();
+	cout << "((N vs O) vs AF) vs noisy\n";
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			cout << res[i][j] << "\t";
+		}
+		cout << "\n";
+	}
+	f1_N = (2.0 * res[0][0]) / (2.0 * res[0][0] + res[0][1] + res[0][2] + res[0][3] + res[1][0] + res[2][0] + res[3][0]);
+	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
+	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
+	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
+	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
+	cout << "F1 = " << f1 << "\n\n\n";
+
+
+	res = p_tree3();
+	cout << "((AF vs O) vs N) vs noisy\n";
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			cout << res[i][j] << "\t";
+		}
+		cout << "\n";
+	}
+	f1_N = (2.0 * res[0][0]) / (2.0 * res[0][0] + res[0][1] + res[0][2] + res[0][3] + res[1][0] + res[2][0] + res[3][0]);
+	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
+	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
+	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
+	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
+	cout << "F1 = " << f1 << "\n\n\n";
+
+
+	res = p_tree4();
+	cout << "(N vs AF vs O) vs noisy\n";
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 4; j++)
