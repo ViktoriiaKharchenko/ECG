@@ -191,7 +191,7 @@ void ButterworthFilter::setParameters(double TSample, double cutoffFrequency, in
 
 vector <double> ButterworthFilter::filter(vector <double> x)
 {
-	const int startDelay = 100;
+	const int startDelay = 20;
 
 	vector <double> newX;
 	for (int i = 0; i < startDelay; i++)
@@ -212,12 +212,15 @@ vector <double> ButterworthFilter::filter(vector <double> x)
 		double a = 0;
 		for (int j = 0; i - j >= 0 && j < xCoefs.size(); j++)
 		{
+			a += x[i - j] * xCoefs[j];
+		}
+
+		for (int j = 0; i - j >= 0 && j < xCoefs.size(); j++)
+		{
 			if (j != 0)
 			{
 				a -= y[i - j] * yCoefs[j];
 			}
-
-			a += x[i - j] * xCoefs[j];
 		}
 
 		y.push_back(a);

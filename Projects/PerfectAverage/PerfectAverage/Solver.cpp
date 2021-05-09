@@ -102,6 +102,11 @@ void Solver::solve2()
 {
 	for (auto it : ECG::reference)
 	{
+		if (it.first < "A05144")
+		{
+			continue;
+		}
+
 		//if (it.second == 'O')
 		{
 			cout << it.first << " " << it.second << "\n";
@@ -114,33 +119,33 @@ void Solver::solve2()
 				continue;
 			}
 
-			ecg.data = vector<double>(ecg.data.begin(), ecg.data.begin() + 8500);
+			ecg.data = vector<double>(ecg.data.begin() + 900, ecg.data.begin() + 4900);
 
-			//vector <double> filter1Average = ecg.averageFilter(ecg.averageFilter(ecg.data, 60), 180);
-			vector <double> filter1Average =ecg.averageFilter(ecg.data, 100);
+			vector <double> filter1Average = ecg.averageFilter(ecg.averageFilter(ecg.data, 60), 180);
+			//vector <double> filter1Average =ecg.averageFilter(ecg.data, 100);
 			ECG ecgFilteredA;
 			ecgFilteredA.drawingColor = Color::Green;
 			ecgFilteredA.data = ecg.data;
 			for (int i = 0; i < ecg.data.size(); i++)
 			{
-				ecgFilteredA.data[i] -= filter1Average[i] + 1000;
+				ecgFilteredA.data[i] -= filter1Average[i] + 800;
 			}
 
-			//vector <double> filter1Median = ecg.medianFilter(ecg.medianFilter(ecg.data, 60), 180);
-			vector <double> filter1Median = ecg.medianFilter(ecg.data, 100);
+			vector <double> filter1Median = ecg.medianFilter(ecg.medianFilter(ecg.data, 60), 180);
+			//vector <double> filter1Median = ecg.medianFilter(ecg.data, 100);
 			ECG ecgFilteredM;
 			ecgFilteredM.drawingColor = Color::Blue;
 			ecgFilteredM.data = ecg.data;
 			for (int i = 0; i < ecg.data.size(); i++)
 			{
-				ecgFilteredM.data[i] -= filter1Median[i] + 2000;
+				ecgFilteredM.data[i] -= filter1Median[i] + 1600;
 			}
 
 			Drawer d;
 
 			d.add(ecg);
-			d.add(ecgFilteredA);
-			d.add(ecgFilteredM);
+			//d.add(ecgFilteredA);
+			//d.add(ecgFilteredM);
 			d.addGraph(filter1Average, 0, Color::Green);
 			d.addGraph(filter1Median, 0, Color::Blue);
 
@@ -233,35 +238,45 @@ void Solver::drawECG()
 
 void Solver::testButterworthFilterSin()
 {
-	ButterworthFilter btwFilter;
+	ButterworthFilter btwFilter1;
+	ButterworthFilter btwFilter2;
 
 	double rate = 1.0 / 300.0;
 
-	btwFilter.setParameters(rate, 35, 10);
+	btwFilter1.setParameters(rate, 35, 3);
+	btwFilter2.setParameters(rate, 35, 10);
 
 	vector <double> arr;
 
 	for (int i = 0; i < 2000; i++)
 	{
-		arr.push_back(100 * sin(1.0 * i * rate) + 50 * sin(50.0 * i * rate));
+		arr.push_back(sin(2.0 * i * rate) + sin(50.0 * i * rate));
 	}
 
-	vector <double> filtered = btwFilter.filter(arr);
+	vector <double> filtered1 = btwFilter1.filter(arr);
+	vector <double> filtered2 = btwFilter2.filter(arr);
 
-	for (auto& it : filtered)
+	for (auto& it : filtered1)
 	{
-		it += 500;
+		it -= 3;
+	}
+
+	for (auto& it : filtered2)
+	{
+		it -= 6;
 	}
 
 	Drawer d;
 
-	ECG e1, e2;
+	ECG e1, e2, e3;
 
-	e1.data = arr; e1.drawingColor = Color::Blue;
-	e2.data = filtered; e2.drawingColor = Color::Green;
+	e1.data = arr; e1.drawingColor = Color::Black;
+	e2.data = filtered1; e2.drawingColor = Color::Blue;
+	e3.data = filtered2; e3.drawingColor = Color::Green;
 
 	d.add(e1);
 	d.add(e2);
+	d.add(e3);
 
 	d.show();
 
@@ -298,7 +313,7 @@ void Solver::testButterworthFilterECG()
 			}
 
 			ButterworthFilter btwFilter;
-			btwFilter.setParameters(1.0 / 300.0, 109, 10);
+			btwFilter.setParameters(1.0 / 300.0, 40.0 * M_PI, 12);
 			ECG filteredECG;
 			filteredECG.data = btwFilter.filter(ecg.data);
 			filteredECG.drawingColor = Color::Green;
@@ -527,7 +542,7 @@ void Solver::drawPart(string ecgPath, string filteredPath, string myPeaksPath, s
 	ecgFiltered.drawingColor = Color::Blue;
 	for (auto& it : ecgFiltered.data)
 	{
-		it -= 2500;
+		it -= 3000;
 	}
 
 	vector <int> myPeaks, refPeaks;
@@ -576,12 +591,23 @@ void Solver::drawPart(string ecgPath, string filteredPath, string myPeaksPath, s
 		d.addVerticalLine(it - l + 3, Color::Red);
 		//d.addVerticalLine(it - l, Color::Red);
 	}
-	d.addVerticalLine(mid - 15, Color::Magenta);
-	d.addVerticalLine(mid + 15, Color::Magenta);
+	//d.addVerticalLine(mid - 15, Color::Magenta);
+	//d.addVerticalLine(mid + 15, Color::Magenta);
 	d.add(ecgOriginal);
 	d.add(ecgFiltered);
 
 	d.show();
+}
+
+void Solver::drawPartWrap()
+{
+	string name = "104";
+	string pathECG = "../../../Data/CSV2/" + name + ".csv";
+	string pathFilt = "../../../Data/CSV2Filtered/" + name + ".txt";
+
+	int val = 113700;
+
+	drawPart(pathECG, pathFilt, "", "", name, val - 2500, val + 2500);
 }
 
 void Solver::calcAlgorithmStatsCSV2()

@@ -12,11 +12,16 @@ int main()
 
 	//s.drawECG();
 
+	//s.solve2();
 	//s.solve3();
+
+	//s.testButterworthFilterECG();
 
 	//s.makeRPeaksCSV2();
 
 	//s.calcAlgorithmStatsCSV2();
+	
+	s.drawPartWrap();
 
 	//s.computeRPeaksDetectionResults();
 
@@ -55,7 +60,7 @@ int main()
 
 	//s2.p_test1_1();
 	//s2.p_test1_2();
-	s2.p_test2();
+	//s2.p_test2();
 
 	return 0;
 }

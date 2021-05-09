@@ -44,6 +44,8 @@ public:
 
 	void drawPart(string ecgPath, string filteredPath, string myPeaksPath, string refPeaksPath, string name, int l, int r);
 
+	void drawPartWrap();
+
 	void calcAlgorithmStatsCSV2();
 
 	void showAllTypes();
