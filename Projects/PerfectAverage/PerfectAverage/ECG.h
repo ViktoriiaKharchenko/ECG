@@ -19,6 +19,8 @@ class ECG
 
 public:
 	
+	vector <int> potentRPeaks;
+
 	static map<string, char> reference;
 	static void initType();
 

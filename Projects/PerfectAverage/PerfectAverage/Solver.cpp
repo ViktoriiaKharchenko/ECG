@@ -68,29 +68,53 @@ void Solver::solve1()
 
 	for (auto it : ECG::reference)
 	{
-		//if (it.second == 'N')
+		//if (it.second == 'A')
 		{
+			if (it.first < "A01000")
+			{
+				continue;
+			}
+
 			cout << it.first << " " << it.second << "\n";
 			ECG ecg;
 
-			ecg.readFromFile("../../../Data/TXT/" + it.first + ".txt");
+			ecg.readFromFile("../../../Data/TXTFiltered/" + it.first + ".txt");
 			cout << ecg.data.size() << endl;
 			if (ecg.data.size() < 8999)
 			{
 				continue;
 			}
-			vector <double> transform = ecg.transformPeaks1(900, 8000);
 
-			vector <int> peaks = ecg.getRPeaks(900, 8000);
-			ecg.data = vector<double>(ecg.data.begin() + 600, ecg.data.begin() + 8300);
+			ecg.data = vector<double>(ecg.data.begin() + 2000, ecg.data.begin() + 7000);
+
+			vector <double> transform = ecg.transformPeaks1(0, 5000);
+			for (auto& it : transform)
+			{
+				it -= 2500;
+			}
+
+			vector <int> peaks = ecg.getRPeaks(0, 5000);
+			vector <int> what = ecg.potentRPeaks;
 
 			Drawer d;
 
 			d.add(ecg);
-			//d.addGraph(transform, 300, Color::Green);
+			d.addGraph(transform, 0, Color::Green);
+			for (int i = 0; i < what.size(); i++)
+			{
+				if (what[i] == 1)
+				{
+					vector <double> sm;
+					sm.push_back(transform[i - 1]);
+					sm.push_back(transform[i]);
+					sm.push_back(transform[i + 1]);
+
+					d.addGraph(sm, i-1, Color::Blue);
+				}
+			}
 			for (auto it : peaks)
 			{
-				d.addVerticalLine(300 + it);
+				d.addVerticalLine(it);
 			}
 
 			d.show();
@@ -102,7 +126,7 @@ void Solver::solve2()
 {
 	for (auto it : ECG::reference)
 	{
-		if (it.first < "A05144")
+		if (it.first < "A00001")
 		{
 			continue;
 		}
@@ -1070,7 +1094,8 @@ void Solver::analyzeComputedStats2()
 		int ok, fp, fn;
 		in >> ok >> fp >> fn;
 
-		if (ts == "203" || ts == "207" || ts == "208" || ts == "210" || ts == "228" || ts == "232")
+		if (ts == "203" || ts == "207" || ts == "208" || ts == "210" || ts == "228" || ts == "232" || ts == "223"
+			|| ts == "104" || ts == "105" || ts == "106" || ts == "108" || ts == "109" || ts == "111" || ts == "201")
 		{
 			continue;
 		}
@@ -1101,7 +1126,7 @@ void Solver::analyzeComputedStats2()
 	for (auto it : allStats)
 	{
 		vector <int> stats = it.second.second;
-		double errP = (stats[1] + stats[2]) / double(stats[0] + stats[2]);
+		double errP = (stats[1] + stats[2]) / double(stats[0] + stats[1] + stats[2]);
 
 		sumStats[it.second.first] += errP;
 	}
@@ -1136,7 +1161,7 @@ void Solver::analyzeComputedStats2()
 
 			cout << name << "+  ";
 
-			double errP = (stats[1] + stats[2]) / double(stats[0] + stats[2]) * 100.0;
+			double errP = (stats[1] + stats[2]) / double(stats[0] + stats[1] + stats[2]) * 100.0;
 
 			cout.precision(5);
 			cout << "ok = " << stats[0] << "  fp = " << stats[1] << "  fn = " << stats[2] << "   " << fixed << errP << "%\n";

@@ -333,6 +333,8 @@ vector <int> ECG::getRPeaks(int l, int r, double WSiseP, double WSiftP,
 		}
 	}
 
+	potentRPeaks = isPeak;
+
 	for (int i = 0; i < r - l; i++)
 	{
 		if (isPeak[i] == 1)

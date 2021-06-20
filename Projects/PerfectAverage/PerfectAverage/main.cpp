@@ -1,6 +1,7 @@
 
 #include "Solver.h"
 #include "SolverForNN.h"
+#include "SolverForNN2.h"
 
 int main()
 {
@@ -10,8 +11,11 @@ int main()
 
 	SolverForNN s2;
 
+	SolverForNN2 s3;
+
 	//s.drawECG();
 
+	//s.solve1();
 	//s.solve2();
 	//s.solve3();
 
@@ -21,7 +25,7 @@ int main()
 
 	//s.calcAlgorithmStatsCSV2();
 	
-	s.drawPartWrap();
+	//s.drawPartWrap();
 
 	//s.computeRPeaksDetectionResults();
 
@@ -31,9 +35,9 @@ int main()
 
 	//s.analyzeComputedStats3();
 
-	//s.makeDataForMoisyClasification();
-	//s.makeDataForMoisyClasification2();
-	//s.makeDataForMoisyClasification3();
+	//s.makeDataForNoisyClasification();
+	//s.makeDataForNoisyClasification2();
+	//s.makeDataForNoisyClasification3();
 
 	//s.makeDataForNoisyModel();
 	//s.makeDataAFvsNormalScaled();
@@ -61,6 +65,19 @@ int main()
 	//s2.p_test1_1();
 	//s2.p_test1_2();
 	//s2.p_test2();
+
+	
+	//s3.makeClassificationData();
+	
+	//s3.makeDataForNvsAF();
+	//s3.makeDataForNvsO();
+	//s3.makeDataForAFvsO();
+	
+	//s3.makeDataForNAFvsO();
+	//s3.makeDataForNOvsAF();
+	//s3.makeDataForNvsAFO();
+
+	s3.makeDataForNvsAFvsO();
 
 	return 0;
 }

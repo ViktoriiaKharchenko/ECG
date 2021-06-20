@@ -1936,6 +1936,7 @@ void SolverForNN::test2()
 	vector <vector <int> > res;
 	double f1_N, f1_A, f1_O, f1_Noi;
 	double f1;
+	double aa, bb, cc, dd;
 
 	res = tree1();
 	cout << "((N vs AF) vs O) vs noisy\n";
@@ -1951,7 +1952,16 @@ void SolverForNN::test2()
 	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
 	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
 	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
-	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	f1 = (f1_N + f1_A + f1_O) / 3.0;
+
+	/*
+	aa = res[0][0] + res[0][1] + res[0][2] + res[1][0] + res[1][1] + res[1][2] + res[2][0] + res[2][1] + res[2][2];
+	bb = res[3][0] + res[3][1] + res[3][2];
+	cc = res[0][3] + res[1][3] + res[2][3];
+	dd = res[3][3];
+	f1_Noi = (aa + dd) / (aa + dd + bb + cc);
+	//*/
+
 	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
 	cout << "F1 = " << f1 << "\n\n\n";
 
@@ -1970,7 +1980,7 @@ void SolverForNN::test2()
 	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
 	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
 	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
-	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	f1 = (f1_N + f1_A + f1_O) / 3.0;
 	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
 	cout << "F1 = " << f1 << "\n\n\n";
 
@@ -1989,7 +1999,7 @@ void SolverForNN::test2()
 	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
 	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
 	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
-	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	f1 = (f1_N + f1_A + f1_O) / 3.0;
 	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
 	cout << "F1 = " << f1 << "\n\n\n";
 
@@ -2008,7 +2018,7 @@ void SolverForNN::test2()
 	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
 	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
 	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
-	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	f1 = (f1_N + f1_A + f1_O) / 3.0;
 	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
 	cout << "F1 = " << f1 << "\n\n\n";
 }
@@ -2719,6 +2729,7 @@ void SolverForNN::p_test2()
 	vector <vector <int> > res;
 	double f1_N, f1_A, f1_O, f1_Noi;
 	double f1;
+	double aa, bb, cc, dd;
 
 	res = p_tree1();
 	cout << "((N vs AF) vs O) vs noisy\n";
@@ -2734,7 +2745,16 @@ void SolverForNN::p_test2()
 	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
 	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
 	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
-	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	f1 = (f1_N + f1_A + f1_O) / 3.0;
+
+	//*
+	aa = res[0][0] + res[0][1] + res[0][2] + res[1][0] + res[1][1] + res[1][2] + res[2][0] + res[2][1] + res[2][2];
+	bb = res[3][0] + res[3][1] + res[3][2];
+	cc = res[0][3] + res[1][3] + res[2][3];
+	dd = res[3][3];
+	f1_Noi = (aa + dd) / (aa + dd + bb + cc);
+	//*/
+
 	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
 	cout << "F1 = " << f1 << "\n\n\n";
 
@@ -2753,7 +2773,7 @@ void SolverForNN::p_test2()
 	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
 	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
 	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
-	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	f1 = (f1_N + f1_A + f1_O) / 3.0;
 	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
 	cout << "F1 = " << f1 << "\n\n\n";
 
@@ -2772,7 +2792,7 @@ void SolverForNN::p_test2()
 	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
 	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
 	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
-	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	f1 = (f1_N + f1_A + f1_O) / 3.0;
 	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
 	cout << "F1 = " << f1 << "\n\n\n";
 
@@ -2791,7 +2811,7 @@ void SolverForNN::p_test2()
 	f1_A = (2.0 * res[1][1]) / (2.0 * res[1][1] + res[1][0] + res[1][2] + res[1][3] + res[0][1] + res[2][1] + res[3][1]);
 	f1_O = (2.0 * res[2][2]) / (2.0 * res[2][2] + res[2][0] + res[2][1] + res[2][3] + res[0][2] + res[1][2] + res[3][2]);
 	f1_Noi = (2.0 * res[3][3]) / (2.0 * res[3][3] + res[3][0] + res[3][1] + res[3][2] + res[0][3] + res[1][3] + res[2][3]);
-	f1 = (f1_N + f1_A + f1_O + f1_Noi) / 4.0;
+	f1 = (f1_N + f1_A + f1_O) / 3.0;
 	cout << "f1_N = " << f1_N << "  f1_A = " << f1_A << "  f1_O = " << f1_O << "  f1_Noi = " << f1_Noi << "\n";
 	cout << "F1 = " << f1 << "\n\n\n";
 }

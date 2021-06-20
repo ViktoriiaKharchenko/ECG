@@ -42,6 +42,9 @@
     <ClCompile Include="SolverForNN.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SolveForNN2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Drawer.h">
@@ -66,6 +69,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SolverForNN.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SolverForNN2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
