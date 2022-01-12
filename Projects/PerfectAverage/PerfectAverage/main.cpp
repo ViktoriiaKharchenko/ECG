@@ -86,7 +86,9 @@ int main()
 	//s4.makeNoi_notNoiData();
 	//s4.makeNoi_notNoiData_validation();
 	//s4.makeNAO_data();
-	s4.makeNAO_data_validation();
+	//s4.makeNAO_data_validation();
+	//s4.makeNAO_data_unfilt();
+	s4.makeNAO_data_validation_unfilt();
 
 
 	return 0;

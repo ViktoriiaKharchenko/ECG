@@ -25,4 +25,7 @@ public:
 
 	void makeNAO_data();
 	void makeNAO_data_validation();
+
+	void makeNAO_data_unfilt();
+	void makeNAO_data_validation_unfilt();
 };
