@@ -25,9 +25,21 @@ void ECG::initType()
 
 		reference[name] = type;
 	}
+
+	in.close();
+
+	in.open("../../../Data/RECORDSVALIDATION.txt");
+
+	while (in >> name)
+	{
+		validNamas.insert(name);
+	}
+
+	in.close();
 }
 
 map<string, char> ECG::reference = map<string, char>();
+set<string> ECG::validNamas = set<string>();
 
 bool ECG::readFromFile(string path)
 {

@@ -141,6 +141,7 @@
     <ClCompile Include="GLine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GPoint.cpp" />
+    <ClCompile Include="Sol4.cpp" />
     <ClCompile Include="SolveForNN2.cpp" />
     <ClCompile Include="Solver.cpp" />
     <ClCompile Include="SolverForNN.cpp" />
@@ -152,6 +153,7 @@
     <ClInclude Include="ECG.h" />
     <ClInclude Include="GLine.h" />
     <ClInclude Include="GPoint.h" />
+    <ClInclude Include="Sol4.h" />
     <ClInclude Include="Solver.h" />
     <ClInclude Include="SolverForNN.h" />
     <ClInclude Include="SolverForNN2.h" />

@@ -22,6 +22,7 @@ public:
 	vector <int> potentRPeaks;
 
 	static map<string, char> reference;
+	static set<string> validNamas;
 	static void initType();
 
 	const int numbersPerSecond;

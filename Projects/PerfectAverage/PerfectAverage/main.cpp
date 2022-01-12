@@ -2,6 +2,7 @@
 #include "Solver.h"
 #include "SolverForNN.h"
 #include "SolverForNN2.h"
+#include "Sol4.h"
 
 int main()
 {
@@ -12,6 +13,8 @@ int main()
 	SolverForNN s2;
 
 	SolverForNN2 s3;
+
+	Sol4 s4;
 
 	//s.drawECG();
 
@@ -77,7 +80,14 @@ int main()
 	//s3.makeDataForNOvsAF();
 	//s3.makeDataForNvsAFO();
 
-	s3.makeDataForNvsAFvsO();
+	//s3.makeDataForNvsAFvsO();
+
+
+	//s4.makeNoi_notNoiData();
+	//s4.makeNoi_notNoiData_validation();
+	//s4.makeNAO_data();
+	s4.makeNAO_data_validation();
+
 
 	return 0;
 }
